@@ -22,17 +22,22 @@ impl Map {
         }
     }
 
-    pub fn render(&self, ctx: &mut BTerm) {
-        for x in 0..SCREEN_WIDTH {
-            for y in 0..SCREEN_HEIGHT {
-                let idx = map_idx(x, y);
-                match self.tiles[idx] {
-                    TileType::Floor => {
-                        ctx.set(x, y, RGB::named(YELLOW), RGB::named(BLACK), to_cp437('.'));
-                    }
-                    TileType::Wall => {
-                        ctx.set(x, y, RGB::named(GREEN), RGB::named(BLACK), to_cp437('#'));
-                    }
+    pub fn render(&self, ctx: &mut BTerm, camera: &Camera) {
+        ctx.set_active_console(0);
+        for y in camera.top_y..camera.bottom_y {
+            for x in camera.left_x..camera.right_x {
+                if self.in_bounds(Point::new(x, y)) {
+                    let glyph = match self.tiles[map_idx(x, y)] {
+                        TileType::Floor => to_cp437('.'),
+                        TileType::Wall => to_cp437('#'),
+                    };
+                    ctx.set(
+                        x - camera.left_x,
+                        y - camera.top_y,
+                        RGB::named(WHITE),
+                        RGB::named(BLACK),
+                        glyph,
+                    );
                 }
             }
         }
