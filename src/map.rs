@@ -31,7 +31,7 @@ impl Map {
                         ctx.set(x, y, RGB::named(YELLOW), RGB::named(BLACK), to_cp437('.'));
                     }
                     TileType::Wall => {
-                        ctx.set(x, y, RGB::named(YELLOW), RGB::named(BLACK), to_cp437('#'));
+                        ctx.set(x, y, RGB::named(GREEN), RGB::named(BLACK), to_cp437('#'));
                     }
                 }
             }
