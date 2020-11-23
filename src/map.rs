@@ -22,27 +22,6 @@ impl Map {
         }
     }
 
-    pub fn render(&self, ctx: &mut BTerm, camera: &Camera) {
-        ctx.set_active_console(0);
-        for y in camera.top_y..camera.bottom_y {
-            for x in camera.left_x..camera.right_x {
-                if self.in_bounds(Point::new(x, y)) {
-                    let glyph = match self.tiles[map_idx(x, y)] {
-                        TileType::Floor => to_cp437('.'),
-                        TileType::Wall => to_cp437('#'),
-                    };
-                    ctx.set(
-                        x - camera.left_x,
-                        y - camera.top_y,
-                        RGB::named(WHITE),
-                        RGB::named(BLACK),
-                        glyph,
-                    );
-                }
-            }
-        }
-    }
-
     pub fn in_bounds(&self, point: Point) -> bool {
         point.x >= 0 && //.
          point.x < SCREEN_WIDTH && //.

@@ -43,17 +43,37 @@ impl MapBuilder {
                 }
             }
             if !overlap {
+                // println!("==== {:?} {:?}", room, room.center());
                 room.for_each(|p| {
                     if p.x > 0 && p.x < SCREEN_WIDTH //.
                     && p.y > 0 && p.y < SCREEN_HEIGHT
                     {
                         let idx = map_idx(p.x, p.y);
+                        // println!("Floor tile @{}:{}", p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
                     }
-                })
+                });
+                self.rooms.push(room)
             }
-            self.rooms.push(room)
         }
+        // self.rooms.iter().for_each(|room| {
+        //     // let minx = min(room.x1, room.x2);
+        //     // let maxx = max(room.x1, room.x2);
+        //     // let miny = min(room.y1, room.y2);
+        //     // let maxy = max(room.y1, room.y2);
+        //     // let mut points = Vec::new();
+        //     // // println!("====");
+        //     // room.for_each(|p| points.push(format!("{}:{}", p.x, p.y)));
+        //     // println!(
+        //     //     "\nRoom -> {}:{} => {}x{} c:{:?}\n{:?}",
+        //     //     minx,
+        //     //     miny,
+        //     //     maxx - minx,
+        //     //     maxy - miny,
+        //     //     room.center(),
+        //     //     points
+        //     // );
+        // })
     }
 
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
