@@ -3,11 +3,14 @@ use crate::prelude::*;
 #[system]
 #[write_component(Point)]
 #[read_component(MovingRandomly)]
-pub fn random_move(ecs: &mut SubWorld, #[resource] map: &Map) {
+pub fn random_move(
+    ecs: &mut SubWorld,
+    #[resource] map: &Map,
+    #[resource] rng: &mut RandomNumberGenerator,
+) {
     let mut movers = <(&mut Point, &MovingRandomly)>::query();
 
     movers.iter_mut(ecs).for_each(|(pos, _)| {
-        let mut rng = RandomNumberGenerator::new();
         let destination = match rng.range(0, 9) {
             0 => Point::new(-1, -1),
             1 => Point::new(-1, 0),
