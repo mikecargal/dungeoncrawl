@@ -1,6 +1,7 @@
 mod collisions;
 mod end_turn;
 mod entity_render;
+mod hud;
 mod map_render;
 mod movements;
 mod player_input;
@@ -10,6 +11,7 @@ use crate::prelude::*;
 
 pub fn build_input_schedule() -> Schedule {
     Schedule::builder()
+        .add_system(hud::hud_system())
         .add_system(player_input::player_input_system())
         .flush()
         .add_system(map_render::map_render_system())
@@ -19,6 +21,7 @@ pub fn build_input_schedule() -> Schedule {
 
 pub fn build_player_schedule() -> Schedule {
     Schedule::builder()
+        .add_system(hud::hud_system())
         .add_system(movements::movement_system())
         .flush()
         .add_system(collisions::collisions_system())
@@ -31,6 +34,7 @@ pub fn build_player_schedule() -> Schedule {
 
 pub fn build_monster_schedule() -> Schedule {
     Schedule::builder()
+        .add_system(hud::hud_system())
         .add_system(random_moves::random_move_system())
         .flush()
         .add_system(movements::movement_system())
