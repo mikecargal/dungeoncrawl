@@ -3,7 +3,7 @@ use crate::prelude::*;
 #[system]
 pub fn map_render(#[resource] map: &Map, #[resource] camera: &Camera) {
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(0);
+    draw_batch.target(BACKGROUND_LAYER.id);
     for y in camera.top_y..=camera.bottom_y {
         for x in camera.left_x..=camera.right_x {
             let pt = Point::new(x, y);
@@ -22,5 +22,7 @@ pub fn map_render(#[resource] map: &Map, #[resource] camera: &Camera) {
             }
         }
     }
-    draw_batch.submit(0).expect("Map Batch Error");
+    draw_batch
+        .submit(BACKGROUND_LAYER.z_order)
+        .expect("Map Batch Error");
 }

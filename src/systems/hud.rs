@@ -8,7 +8,7 @@ pub fn hud(ecs: &SubWorld) {
     let player_health = health_query.iter(ecs).nth(0).unwrap();
 
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(2);
+    draw_batch.target(HUD_LAYER.id);
     draw_batch.print_centered(1, "Explore the Dungeon.  Cursor keys to move.");
     draw_batch.bar_horizontal(
         Point::zero(),
@@ -25,5 +25,5 @@ pub fn hud(ecs: &SubWorld) {
         ),
         ColorPair::new(WHITE, RED),
     );
-    draw_batch.submit(10_000).expect("Batch error");
+    draw_batch.submit(HUD_LAYER.z_order).expect("Batch error");
 }

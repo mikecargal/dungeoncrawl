@@ -26,6 +26,24 @@ pub mod prelude {
     pub const SCREEN_HEIGHT: i32 = 50;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
     pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
+
+    #[derive(Debug, Copy, Clone)]
+    pub struct LayerDef {
+        pub id: usize,
+        pub z_order: usize,
+    }
+
+    pub const BACKGROUND_LAYER: LayerDef = LayerDef { id: 0, z_order: 0 };
+    pub const ENTITY_LAYER: LayerDef = LayerDef {
+        id: 1,
+        z_order: 15_000,
+    };
+    pub const HUD_LAYER: LayerDef = LayerDef {
+        id: 2,
+        z_order: 10_000,
+    };
+
+    pub const RENDER_LAYERS: [LayerDef; 3] = [BACKGROUND_LAYER, ENTITY_LAYER, HUD_LAYER];
 }
 
 use prelude::*;
@@ -67,13 +85,13 @@ impl State {
 
 impl GameState for State {
     fn tick(&mut self, ctx: &mut BTerm) {
-        ctx.set_active_console(0);
-        ctx.cls();
-        ctx.set_active_console(1);
-        ctx.cls();
-        ctx.set_active_console(2);
-        ctx.cls();
+        for layer in RENDER_LAYERS.iter() {
+            ctx.set_active_console((*layer).id);
+            ctx.cls();
+        }
         self.resources.insert(ctx.key);
+        ctx.set_active_console(ENTITY_LAYER.id);
+        self.resources.insert(Point::from_tuple(ctx.mouse_pos()));
         let current_state = self.resources.get::<TurnState>().unwrap().clone();
         match current_state {
             TurnState::AwaitingInput => self
@@ -100,7 +118,7 @@ fn main() -> BError {
         .with_font("terminal8x8.png", 8, 8)
         .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
         .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
-        .with_simple_console_no_bg(DISPLAY_WIDTH * 2, DISPLAY_HEIGHT * 2, "terminal8x8.png")
+        .with_simple_console_no_bg(DISPLAY_WIDTH * 4, DISPLAY_HEIGHT * 4, "terminal8x8.png")
         .build()?;
 
     main_loop(context, State::new())

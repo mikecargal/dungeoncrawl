@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[read_component(Render)]
 pub fn player_coord_render(ecs: &SubWorld) {
     let mut draw_batch = DrawBatch::new();
-    draw_batch.target(1);
+    draw_batch.target(ENTITY_LAYER.id);
     <&Point>::query()
         .filter(component::<Player>())
         .iter(ecs)
@@ -19,5 +19,7 @@ pub fn player_coord_render(ecs: &SubWorld) {
                 );
             }
         });
-    draw_batch.submit(15000).expect("Coord Batch Error");
+    draw_batch
+        .submit(ENTITY_LAYER.z_order)
+        .expect("Coord Batch Error");
 }
