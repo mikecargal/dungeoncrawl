@@ -26,6 +26,10 @@ pub mod prelude {
     pub const SCREEN_HEIGHT: i32 = 50;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
     pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
+    pub const GAME_TILE_WIDTH: i32 = 32;
+    pub const GAME_TILE_HEIGHT: i32 = 32;
+    pub const HUD_TILE_WIDTH: i32 = 8;
+    pub const HUD_TILE_HEIGHT: i32 = 8;
 
     #[derive(Debug, Copy, Clone)]
     pub struct LayerDef {
@@ -34,13 +38,13 @@ pub mod prelude {
     }
 
     pub const BACKGROUND_LAYER: LayerDef = LayerDef { id: 0, z_order: 0 };
-    pub const ENTITY_LAYER: LayerDef = LayerDef {
-        id: 1,
-        z_order: 15_000,
-    };
     pub const HUD_LAYER: LayerDef = LayerDef {
         id: 2,
-        z_order: 10_000,
+        z_order: BACKGROUND_LAYER.z_order + 10_000,
+    };
+    pub const ENTITY_LAYER: LayerDef = LayerDef {
+        id: 1,
+        z_order: HUD_LAYER.z_order + 5_000,
     };
 
     pub const RENDER_LAYERS: [LayerDef; 3] = [BACKGROUND_LAYER, ENTITY_LAYER, HUD_LAYER];
@@ -112,13 +116,17 @@ fn main() -> BError {
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
         .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT)
-        .with_tile_dimensions(32, 32)
+        .with_tile_dimensions(GAME_TILE_WIDTH, GAME_TILE_WIDTH)
         .with_resource_path("resources/")
-        .with_font("dungeonfont.png", 32, 32)
-        .with_font("terminal8x8.png", 8, 8)
+        .with_font("dungeonfont.png", GAME_TILE_WIDTH, GAME_TILE_WIDTH)
+        .with_font("terminal8x8.png", HUD_TILE_WIDTH, HUD_TILE_WIDTH)
         .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
         .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
-        .with_simple_console_no_bg(DISPLAY_WIDTH * 4, DISPLAY_HEIGHT * 4, "terminal8x8.png")
+        .with_simple_console_no_bg(
+            DISPLAY_WIDTH * (GAME_TILE_WIDTH / HUD_TILE_WIDTH),
+            DISPLAY_HEIGHT * (GAME_TILE_HEIGHT / HUD_TILE_HEIGHT),
+            "terminal8x8.png",
+        )
         .build()?;
 
     main_loop(context, State::new())

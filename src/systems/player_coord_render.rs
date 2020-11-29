@@ -12,11 +12,7 @@ pub fn player_coord_render(ecs: &SubWorld) {
         .for_each(|pos| {
             let posn = format!("{}:{}", pos.x, pos.y);
             for (i, c) in posn.chars().enumerate() {
-                draw_batch.set(
-                    Point::new(i, 0),
-                    ColorPair::new(RGB::named(GREEN), RGB::named(BLACK)),
-                    to_cp437(c),
-                );
+                draw_batch.set(Point::new(i, 0), ColorPair::new(GREEN, BLACK), to_cp437(c));
             }
         });
     draw_batch
