@@ -36,7 +36,6 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
                         .get_component::<Player>()
                         .is_ok()
                     {
-                        println!("Entity {:?} wants to attack {:?}", entity, victim);
                         commands.push((
                             (),
                             WantsToAttack {
