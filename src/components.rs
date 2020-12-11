@@ -1,4 +1,5 @@
 pub use crate::prelude::*;
+use std::collections::HashSet;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Render {
@@ -44,3 +45,26 @@ pub struct Item;
 
 #[derive(Debug, Copy, Clone, PartialEq)]
 pub struct AmuletOfYala;
+
+#[derive(Debug, PartialEq, Clone)]
+pub struct FieldOfView {
+    pub visible_tiles: HashSet<Point>,
+    pub radius: i32,
+    pub is_dirty: bool,
+}
+
+impl FieldOfView {
+    pub fn new(radius: i32) -> Self {
+        Self {
+            visible_tiles: HashSet::new(),
+            radius,
+            is_dirty: true,
+        }
+    }
+
+    pub fn clone_dirty(&self) -> Self {
+        let mut cloned = self.clone(); // TODO: isn't this expensive??
+        cloned.is_dirty = true;
+        cloned
+    }
+}

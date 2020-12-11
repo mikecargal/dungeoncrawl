@@ -108,9 +108,9 @@ impl State {
             BLACK,
             "Don't worry, you can always try again with a new hero.",
         );
-        ctx.print_color_centered(9, GREEN, BLACK, "Press an key to play again.");
+        ctx.print_color_centered(9, GREEN, BLACK, "Press 1 to play again.");
 
-        if let Some(_) = ctx.key {
+        if let Some(VirtualKeyCode::Key1) = ctx.key {
             self.reset_game_state();
         }
     }
@@ -130,9 +130,9 @@ impl State {
             BLACK,
             "Your toen is saved, and you can return to your normal life.",
         );
-        ctx.print_color_centered(7, GREEN, BLACK, "Press an key to play again.");
+        ctx.print_color_centered(7, GREEN, BLACK, "Press 1 to play again.");
 
-        if let Some(_) = ctx.key {
+        if let Some(VirtualKeyCode::Key1) = ctx.key {
             self.reset_game_state();
         }
     }
