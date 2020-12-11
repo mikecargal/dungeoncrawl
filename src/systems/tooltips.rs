@@ -16,7 +16,10 @@ pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camer
     let player_fov = fov.iter(ecs).nth(0).unwrap();
     positions
         .iter(ecs)
-        .filter(|(_, pos, _)| **pos == map_pos && player_fov.visible_tiles.contains(&pos))
+        .filter(|(_, pos, _)| {
+            let visible_to_player = player_fov.is_visible(pos);
+            **pos == map_pos && visible_to_player
+        })
         .for_each(|(entity, _, name)| {
             let screen_pos = (*mouse_pos * (GAME_TILE_WIDTH / HUD_TILE_WIDTH)) - 1;
             let display =

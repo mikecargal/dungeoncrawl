@@ -19,7 +19,7 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
 
     movers
         .iter(ecs)
-        .filter(|(_, _, _, fov)| fov.visible_tiles.contains(&player_pos))
+        .filter(|(_, _, _, fov)| fov.is_visible(&player_pos))
         .for_each(|(entity, pos, _, _)| {
             let idx = map_idx(pos.x, pos.y);
             if let Some(destination) = DijkstraMap::find_lowest_exit(&dijkstra_map, idx, map) {

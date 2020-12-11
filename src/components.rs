@@ -48,23 +48,35 @@ pub struct AmuletOfYala;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FieldOfView {
-    pub visible_tiles: HashSet<Point>,
+    pub visible_tiles: Option<HashSet<Point>>,
     pub radius: i32,
-    pub is_dirty: bool,
+    //pub is_dirty: bool,
 }
 
 impl FieldOfView {
     pub fn new(radius: i32) -> Self {
         Self {
-            visible_tiles: HashSet::new(),
+            visible_tiles: None,
             radius,
-            is_dirty: true,
+            //is_dirty: true,
         }
     }
 
     pub fn clone_dirty(&self) -> Self {
-        let mut cloned = self.clone(); // TODO: isn't this expensive??
-        cloned.is_dirty = true;
-        cloned
+        // let mut cloned = self.clone(); // TODO: isn't this expensive??
+        // cloned.is_dirty = true;
+        // cloned
+        Self {
+            visible_tiles: None,
+            radius: self.radius,
+            // is_dirty: true,
+        }
+    }
+
+    pub fn is_visible(&self, pt: &Point) -> bool {
+        match &self.visible_tiles {
+            Some(vt) => vt.contains(pt),
+            None => false,
+        }
     }
 }
