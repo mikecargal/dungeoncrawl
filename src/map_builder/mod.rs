@@ -2,10 +2,12 @@ use crate::prelude::*;
 mod automata;
 mod drunkard;
 mod empty;
+mod prefab;
 mod rooms;
-use crate::map_builder::rooms::RoomsArchitect;
 use automata::CellularAutomataArchitect;
 use drunkard::DrunkardsWalkArchitect;
+use prefab::apply_prefab;
+use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
 const NUM_ROOMS: usize = 20;
@@ -27,11 +29,14 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            _ => Box::new(DrunkardsWalkArchitect {}),
-           // 1 => Box::new(RoomsArchitect {}),
-           // _ => Box::new(CellularAutomataArchitect {}),
+            0 => Box::new(DrunkardsWalkArchitect {}),
+            1 => Box::new(RoomsArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {}),
         };
-        architect.build(rng)
+        let mut mb = architect.build(rng);
+        apply_prefab(&mut mb, rng);
+        println!("Amulet is at {:?}", mb.amulet_start);
+        mb
     }
 
     fn fill(&mut self, tile: TileType) {
