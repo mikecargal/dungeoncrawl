@@ -21,13 +21,30 @@ impl MapArchitect for CellularAutomataArchitect {
         mb.monster_spawns = mb.spawn_monsters(&start, rng);
         mb.player_start = start;
         mb.amulet_start = mb.find_most_distant();
+        display(
+            "Automata Map ",
+            &mb.map,
+            &mb.player_start,
+            &mb.amulet_start,
+            &Vec::new(),
+        );
         mb
     }
 }
 
 impl CellularAutomataArchitect {
     fn random_noise_map(&mut self, rng: &mut RandomNumberGenerator, map: &mut Map) {
-        map.tiles.iter_mut().for_each(|t| {
+        let bounds = map.dimensions();
+        let idx_to_point = |idx: usize| {
+            let w = bounds.x as usize;
+            Point::new(idx % w, idx / w)
+        };
+
+        map.tiles.iter_mut().enumerate().for_each(|(idx, t)| {
+            if !(Map::in_floor_bounds(idx_to_point(idx))) {
+                *t = TileType::Wall;
+                return;
+            }
             let roll = rng.range(0, 100);
             if roll > 55 {
                 *t = TileType::Floor;
@@ -56,7 +73,7 @@ impl CellularAutomataArchitect {
             for x in 1..SCREEN_WIDTH - 1 {
                 let neighbors = self.count_neighbors(x, y, map);
                 let idx = map_idx(x, y);
-                if neighbors > 4 || neighbors == 0 {
+                if neighbors > 4 || neighbors == 0 || !Map::in_floor_bounds(Point::new(x, y)) {
                     new_tiles[idx] = TileType::Wall
                 } else {
                     new_tiles[idx] = TileType::Floor;

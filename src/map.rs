@@ -11,6 +11,7 @@ pub enum TileType {
 pub fn map_idx(x: i32, y: i32) -> usize {
     ((y * SCREEN_WIDTH) + x) as usize
 }
+
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub revealed_tiles: Vec<bool>,
@@ -24,16 +25,33 @@ impl Map {
         }
     }
 
-    pub fn in_bounds(&self, point: Point) -> bool {
+    pub fn in_floor_bounds(point: Point) -> bool {
+        point.x >= 1 && //.
+            point.x < SCREEN_WIDTH-1 && //.
+            point.y >= 1 && //.
+            point.y < SCREEN_HEIGHT-1
+    }
+
+    pub fn in_bounds(point: Point) -> bool {
         point.x >= 0 && //.
-         point.x < SCREEN_WIDTH && //.
-         point.y >= 0 && //.
-         point.y < SCREEN_HEIGHT
+            point.x < SCREEN_WIDTH && //.
+            point.y >= 0 && //.
+            point.y < SCREEN_HEIGHT
     }
 
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        self.in_bounds(point) && //.
-        self.tiles[map_idx(point.x, point.y)] == TileType::Floor
+        let can_enter = self.in_bounds(point) && //.
+            self.tiles[map_idx(point.x, point.y)] == TileType::Floor;
+        //  if !can_enter {
+        //  let tt = match self.tiles[map_idx(point.x, point.y)] {
+        //     TileType::Wall => "wall",
+        //     TileType::Floor => "floor",
+        // };
+        //         println!("in_bounds={} tileType={}", self.in_bounds(point), tt);
+        //  }
+        can_enter
+        //self.in_bounds(point) && //.
+        //self.tiles[map_idx(point.x, point.y)] == TileType::Floor
     }
 
     pub fn try_idx(&self, point: Point) -> Option<usize> {

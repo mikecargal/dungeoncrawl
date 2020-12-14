@@ -29,9 +29,20 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => Box::new(DrunkardsWalkArchitect {}),
-            1 => Box::new(RoomsArchitect {}),
-            _ => Box::new(CellularAutomataArchitect {}),
+            /*
+                 0 => {
+                println!("Drunkard's walk Architect");
+                Box::new(DrunkardsWalkArchitect {})
+            }
+            1 => {
+                println!("Rooms Architect");
+                Box::new(RoomsArchitect {})
+            }
+            */
+            _ => {
+                println!("Cellular Automata Architect");
+                Box::new(CellularAutomataArchitect {})
+            }
         };
         let mut mb = architect.build(rng);
         apply_prefab(&mut mb, rng);
@@ -81,7 +92,7 @@ impl MapBuilder {
             if !overlap {
                 room.for_each(|p| {
                     if p.x > 0 && p.x < SCREEN_WIDTH //.
-                    && p.y > 0 && p.y < SCREEN_HEIGHT
+                        && p.y > 0 && p.y < SCREEN_HEIGHT
                     {
                         let idx = map_idx(p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
@@ -148,4 +159,48 @@ impl MapBuilder {
         }
         spawns
     }
+}
+pub fn display(
+    title: &str,
+    map: &Map,
+    player_start: &Point,
+    amulet_start: &Point,
+    monster_spawns: &[Point],
+) {
+    use colored::*;
+    let mut output = vec!['.'; NUM_TILES];
+
+    map.tiles.iter().enumerate().for_each(|(idx, t)| match *t {
+        TileType::Floor => output[idx] = '.',
+        TileType::Wall => output[idx] = '#',
+    });
+
+    output[map.point2d_to_index(*player_start)] = '@';
+    output[map.point2d_to_index(*amulet_start)] = 'A';
+    monster_spawns.iter().for_each(|p| {
+        output[map.point2d_to_index(*p)] = 'M';
+    });
+
+    print!("\x1B[2J"); // CLS!
+    println!(
+        "----------------------\n{}\n----------------------",
+        title.bright_yellow()
+    );
+    for y in 0..SCREEN_HEIGHT {
+        for x in 0..SCREEN_WIDTH {
+            match output[map_idx(x, y)] {
+                '#' => print!("{}", "#".bright_green()),
+                '@' => print!("{}", "@".bright_yellow()),
+                'M' => print!("{}", "M".bright_red()),
+                'A' => print!("{}", "A".bright_magenta()),
+                _ => print!("{}", ".".truecolor(64, 64, 64)),
+            }
+        }
+        println!();
+    }
+
+    //       let mut ignore_me = String::new();
+    //       stdin()
+    //           .read_line(&mut ignore_me)
+    //           .expect("Failed to read line");
 }

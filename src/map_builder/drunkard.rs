@@ -29,7 +29,10 @@ impl MapArchitect for DrunkardsWalkArchitect {
             < DESIRED_FLOOR
         {
             self.drunkard(
-                &Point::new(rng.range(0, SCREEN_WIDTH), rng.range(0, SCREEN_HEIGHT)),
+                &Point::new(
+                    rng.range(1, SCREEN_WIDTH - 1),
+                    rng.range(1, SCREEN_HEIGHT - 1),
+                ),
                 rng,
                 &mut mb.map,
             );
@@ -51,6 +54,13 @@ impl MapArchitect for DrunkardsWalkArchitect {
         mb.monster_spawns = mb.spawn_monsters(&center, rng);
         mb.player_start = center;
         mb.amulet_start = mb.find_most_distant();
+        display(
+            "Drunken Map ",
+            &mb.map,
+            &mb.player_start,
+            &mb.amulet_start,
+            &Vec::new(),
+        );
         mb
     }
 }
@@ -63,13 +73,13 @@ impl DrunkardsWalkArchitect {
             let drunk_idx = map.point2d_to_index(drunkard_pos);
             map.tiles[drunk_idx] = TileType::Floor;
 
-            match rng.range(0, 4) {
-                0 => drunkard_pos.x -= 1,
-                1 => drunkard_pos.x += 1,
-                2 => drunkard_pos.y -= 1,
+            match rng.range(0, 6) {
+                0..=1 => drunkard_pos.x -= 1,
+                2..=3 => drunkard_pos.x += 1,
+                4 => drunkard_pos.y -= 1,
                 _ => drunkard_pos.y -= 1,
             }
-            if !map.in_bounds(drunkard_pos) {
+            if !Map::in_floor_bounds(drunkard_pos) {
                 break;
             }
 
