@@ -8,14 +8,14 @@ struct FortressStruct<'a> {
 const FORTRESS: FortressStruct = FortressStruct {
     map_str: "
 ------------
----######---
----#----#---
----#-M--#---
+--########--
+--#------#--
+--##-M--##--
 -###----###-
 --M------M--
 -###----###-
 ---#----#---
----#----#---
+---##--##---
 ---######---
 ------------
 ",
@@ -24,6 +24,7 @@ const FORTRESS: FortressStruct = FortressStruct {
 };
 
 pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
+    println!("apply_prefab");
     let mut placement = None;
 
     let dijkstra_map = DijkstraMap::new(
@@ -52,9 +53,15 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         if can_place {
             placement = Some(Point::new(dimensions.x1, dimensions.y1));
             let points = dimensions.point_set();
+            println!("before retain {:?}", &mb.monster_spawns);
             mb.monster_spawns.retain(|pt| !points.contains(pt));
+            println!("after retain {:?}", &mb.monster_spawns);
         }
         attempts += 1;
+    }
+
+    if placement == None {
+        println!("could not place prefab");
     }
 
     if let Some(placement) = placement {

@@ -30,12 +30,12 @@ impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
             0 => {
-                println!("Drunkard's walk Architect");
-                Box::new(DrunkardsWalkArchitect {})
-            }
-            1 => {
                 println!("Rooms Architect");
                 Box::new(RoomsArchitect {})
+            }
+            1 => {
+                println!("Drunkard's walk Architect");
+                Box::new(DrunkardsWalkArchitect {})
             }
             _ => {
                 println!("Cellular Automata Architect");
@@ -45,6 +45,11 @@ impl MapBuilder {
         let mut mb = architect.build(rng);
         apply_prefab(&mut mb, rng);
         println!("Amulet is at {:?}", mb.amulet_start);
+        println!(
+            "monster.spawns[{}]={:?}",
+            &mb.monster_spawns.len(),
+            &mb.monster_spawns
+        );
         mb
     }
 
@@ -179,7 +184,7 @@ pub fn display(
         output[map.point2d_to_index(*p)] = 'M';
     });
 
-    print!("\x1B[2J"); // CLS!
+    //print!("\x1B[2J");
     println!(
         "----------------------\n{}\n----------------------",
         title.bright_yellow()
