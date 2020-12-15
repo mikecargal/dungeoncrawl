@@ -5,6 +5,7 @@ mod entity_render;
 mod fov;
 mod hud;
 mod map_render;
+mod monster_monitor;
 mod movement;
 mod player_input;
 mod random_move;
@@ -21,6 +22,7 @@ pub fn build_input_schedule() -> Schedule {
         .add_system(entity_render::entity_render_system())
         .add_system(hud::hud_system())
         .add_system(tooltips::tooltips_system())
+        .add_system(monster_monitor::monster_monitor_system())
         .build()
 }
 
@@ -36,7 +38,7 @@ pub fn build_player_schedule() -> Schedule {
         .add_system(entity_render::entity_render_system())
         .add_system(hud::hud_system())
         .add_system(end_turn::end_turn_system())
-        // .add_system(tooltips::tooltips_system())
+        .add_system(monster_monitor::monster_monitor_system())
         .build()
 }
 
@@ -55,6 +57,6 @@ pub fn build_monster_schedule() -> Schedule {
         .add_system(entity_render::entity_render_system())
         .add_system(hud::hud_system())
         .add_system(end_turn::end_turn_system())
-        // .add_system(tooltips::tooltips_system())
+        .add_system(monster_monitor::monster_monitor_system())
         .build()
 }

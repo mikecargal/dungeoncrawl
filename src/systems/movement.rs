@@ -3,9 +3,8 @@ use crate::prelude::*;
 #[system(for_each)]
 #[read_component(Point)]
 #[read_component(Player)]
+#[read_component(Enemy)]
 #[read_component(FieldOfView)]
-#[read_component(ChasingPlayer)]
-#[read_component(Player)]
 pub fn movement(
     entity: &Entity,
     want_move: &WantsToMove,
@@ -15,11 +14,10 @@ pub fn movement(
     commands: &mut CommandBuffer,
 ) {
     if map.can_enter_tile(want_move.destination) {
-        let mut movers = <(Entity, &Point, &ChasingPlayer, &FieldOfView)>::query();
-        if movers
+        if !<&Point>::query()
+            .filter(component::<Enemy>())
             .iter(ecs)
-            .find(|(_, pt, _, _)| **pt == want_move.destination)
-            .is_none()
+            .any(|pt| *pt == want_move.destination)
         {
             commands.add_component(want_move.entity, want_move.destination);
             if let Ok(entry) = ecs.entry_ref(want_move.entity) {

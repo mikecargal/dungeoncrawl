@@ -26,7 +26,7 @@ impl MapArchitect for CellularAutomataArchitect {
             &mb.map,
             &mb.player_start,
             &mb.amulet_start,
-            &Vec::new(),
+            &mb.monster_spawns,
         );
         mb
     }

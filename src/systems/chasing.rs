@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::collections::HashSet;
 
 #[system]
 #[read_component(Point)]
@@ -17,6 +18,7 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
     let search_targets = vec![player_idx];
     let dijkstra_map = DijkstraMap::new(SCREEN_WIDTH, SCREEN_HEIGHT, &search_targets, map, 1024.0);
 
+    let mut requested_destinations = HashSet::new();
     movers
         .iter(ecs)
         .filter(|(_, _, _, fov)| fov.is_visible(&player_pos))
@@ -51,7 +53,8 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
                         attacked = true;
                     });
 
-                if !attacked {
+                if !attacked && !requested_destinations.contains(&destination) {
+                    requested_destinations.insert(destination);
                     commands.push((
                         (),
                         WantsToMove {
