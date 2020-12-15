@@ -29,8 +29,7 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            /*
-                 0 => {
+            0 => {
                 println!("Drunkard's walk Architect");
                 Box::new(DrunkardsWalkArchitect {})
             }
@@ -38,7 +37,6 @@ impl MapBuilder {
                 println!("Rooms Architect");
                 Box::new(RoomsArchitect {})
             }
-            */
             _ => {
                 println!("Cellular Automata Architect");
                 Box::new(CellularAutomataArchitect {})

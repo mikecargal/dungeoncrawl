@@ -5,7 +5,7 @@ mod entity_render;
 mod fov;
 mod hud;
 mod map_render;
-mod movements;
+mod movement;
 mod player_input;
 mod random_move;
 mod tooltips;
@@ -28,7 +28,7 @@ pub fn build_player_schedule() -> Schedule {
     Schedule::builder()
         .add_system(combat::combat_system())
         .flush()
-        .add_system(movements::movement_system())
+        .add_system(movement::movement_system())
         .flush()
         .add_system(fov::fov_system())
         .flush()
@@ -47,7 +47,7 @@ pub fn build_monster_schedule() -> Schedule {
         .flush()
         .add_system(combat::combat_system())
         .flush()
-        .add_system(movements::movement_system())
+        .add_system(movement::movement_system())
         .flush()
         .add_system(fov::fov_system())
         .flush()

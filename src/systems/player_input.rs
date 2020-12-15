@@ -19,6 +19,8 @@ pub fn player_input(
     //  check_entity_positions(ev);
 
     if let Some(key) = key {
+        let mut did_something = false;
+
         let delta = match key {
             VirtualKeyCode::Left => Point::new(-1, 0),
             VirtualKeyCode::Right => Point::new(1, 0),
@@ -26,7 +28,6 @@ pub fn player_input(
             VirtualKeyCode::Down => Point::new(0, 1),
             _ => Point::new(0, 0),
         };
-        let mut did_something = false;
         let (player_entity, destination) = players
             .iter(ecs)
             .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
