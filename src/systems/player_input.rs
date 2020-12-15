@@ -14,10 +14,6 @@ pub fn player_input(
     let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
     let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
 
-    //  let mut entities = <(Entity,&Point)>::query();
-    //  let ev: Vec<(&Entity, &Point)> = entities.iter(ecs).collect();
-    //  check_entity_positions(ev);
-
     if let Some(key) = key {
         let mut did_something = false;
 
@@ -32,7 +28,6 @@ pub fn player_input(
             .iter(ecs)
             .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
             .unwrap();
-        //  assert_ne!(0,destination.y);
         if delta.x != 0 || delta.y != 0 {
             let mut hit_something = false;
             enemies
@@ -74,14 +69,3 @@ pub fn player_input(
         *turn_state = TurnState::PlayerTurn;
     }
 }
-
-/*
-fn check_entity_positions(entities: Vec<(&Entity, &Point)>) {
-    entities
-        .iter()
-        .enumerate()
-        .for_each(|(idx, (&_entity, &point))| {
-            println!("Entity[{}] @ {:?}", idx, point);
-        });
-}
-*/

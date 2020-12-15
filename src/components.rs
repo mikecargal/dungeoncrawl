@@ -50,7 +50,6 @@ pub struct AmuletOfYala;
 pub struct FieldOfView {
     pub visible_tiles: Option<HashSet<Point>>,
     pub radius: i32,
-    //pub is_dirty: bool,
 }
 
 impl FieldOfView {
@@ -58,18 +57,13 @@ impl FieldOfView {
         Self {
             visible_tiles: None,
             radius,
-            //is_dirty: true,
         }
     }
 
     pub fn clone_dirty(&self) -> Self {
-        // let mut cloned = self.clone(); // TODO: isn't this expensive??
-        // cloned.is_dirty = true;
-        // cloned
         Self {
             visible_tiles: None,
             radius: self.radius,
-            // is_dirty: true,
         }
     }
 

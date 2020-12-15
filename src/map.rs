@@ -40,18 +40,7 @@ impl Map {
     }
 
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        let can_enter = self.in_bounds(point) && //.
-            self.tiles[map_idx(point.x, point.y)] == TileType::Floor;
-        //  if !can_enter {
-        //  let tt = match self.tiles[map_idx(point.x, point.y)] {
-        //     TileType::Wall => "wall",
-        //     TileType::Floor => "floor",
-        // };
-        //         println!("in_bounds={} tileType={}", self.in_bounds(point), tt);
-        //  }
-        can_enter
-        //self.in_bounds(point) && //.
-        //self.tiles[map_idx(point.x, point.y)] == TileType::Floor
+        self.in_bounds(point) && self.tiles[map_idx(point.x, point.y)] == TileType::Floor
     }
 
     pub fn try_idx(&self, point: Point) -> Option<usize> {
