@@ -63,6 +63,17 @@ struct State {
 
 impl State {
     fn new() -> Self {
+        let (ecs, resources) = State::initialized_resources();
+        Self {
+            ecs,
+            resources,
+            input_systems: build_input_schedule(),
+            player_systems: build_player_schedule(),
+            monster_systems: build_monster_schedule(),
+        }
+    }
+
+    fn initialized_resources() -> (World, Resources) {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
@@ -77,13 +88,8 @@ impl State {
         resources.insert(Camera::new(map_builder.player_start));
         resources.insert(TurnState::AwaitingInput);
         resources.insert(rng);
-        Self {
-            ecs,
-            resources,
-            input_systems: build_input_schedule(),
-            player_systems: build_player_schedule(),
-            monster_systems: build_monster_schedule(),
-        }
+        resources.insert(map_builder.theme);
+        (ecs, resources)
     }
 
     fn game_over(&mut self, ctx: &mut BTerm) {
@@ -137,27 +143,9 @@ impl State {
     }
 
     fn reset_game_state(&mut self) {
-        self.ecs = World::default();
-        self.resources = Resources::default();
-        let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::build(&mut rng);
-        spawn_player(&mut self.ecs, map_builder.player_start);
-        spawn_amulet_of_yala(&mut self.ecs, map_builder.amulet_start);
-        map_builder
-            .monster_spawns
-            .iter()
-            .for_each(|pos| spawn_monster(&mut self.ecs, &mut rng, *pos));
-
-        map_builder
-            .rooms
-            .iter()
-            .skip(1)
-            .map(|r| r.center())
-            .for_each(|pos| spawn_monster(&mut self.ecs, &mut rng, pos));
-        self.resources.insert(map_builder.map);
-        self.resources.insert(Camera::new(map_builder.player_start));
-        self.resources.insert(TurnState::AwaitingInput);
-        self.resources.insert(rng);
+        let (ecs, resources) = State::initialized_resources();
+        self.ecs = ecs;
+        self.resources = resources;
     }
 }
 

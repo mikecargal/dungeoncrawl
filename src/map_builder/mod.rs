@@ -4,6 +4,9 @@ mod drunkard;
 mod empty;
 mod prefab;
 mod rooms;
+mod themes;
+
+use crate::map_builder::themes::{DungeonTheme, ForestTheme};
 use automata::CellularAutomataArchitect;
 use drunkard::DrunkardsWalkArchitect;
 use prefab::apply_prefab;
@@ -24,6 +27,7 @@ pub struct MapBuilder {
     pub monster_spawns: Vec<Point>,
     pub player_start: Point,
     pub amulet_start: Point,
+    pub theme: Option<Box<dyn MapTheme>>,
 }
 
 impl MapBuilder {
@@ -44,6 +48,12 @@ impl MapBuilder {
         };
         let mut mb = architect.build(rng);
         apply_prefab(&mut mb, rng);
+
+        mb.theme = match rng.range(0, 2) {
+            0 => Some(DungeonTheme::new()),
+            _ => Some(ForestTheme::new()),
+        };
+
         println!("Amulet is at {:?}", mb.amulet_start);
         println!(
             "monster.spawns[{}]={:?}",
@@ -206,4 +216,8 @@ pub fn display(
     //       stdin()
     //           .read_line(&mut ignore_me)
     //           .expect("Failed to read line");
+}
+
+pub trait MapTheme: Sync + Send {
+    fn tile_to_render(&self, tile_type: TileType) -> FontCharType;
 }
