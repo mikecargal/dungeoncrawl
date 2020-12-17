@@ -13,6 +13,8 @@ use prefab::apply_prefab;
 use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 
+pub use themes::*;
+
 const NUM_ROOMS: usize = 20;
 
 const UNREACHABLE: f32 = std::f32::MAX;

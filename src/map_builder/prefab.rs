@@ -61,10 +61,8 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     }
 
     #[cfg(debug)]
-    {
-        if placement == None {
-            println!("could not place prefab");
-        }
+    if placement == None {
+        println!("could not place prefab");
     }
 
     if let Some(placement) = placement {

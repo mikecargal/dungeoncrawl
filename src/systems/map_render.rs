@@ -25,12 +25,13 @@ pub fn map_render(
                 } else {
                     DARK_GRAY
                 };
-                let glyph = match theme {
-                    Some(theme) => theme.tile_to_render(map.tiles[idx]),
-                    None => match map.tiles[idx] {
-                        TileType::Floor => to_cp437('.'),
-                        TileType::Wall => to_cp437('#'),
-                    },
+                let glyph = if let Some(theme) = theme {
+                    theme.tile_to_render(map.tiles[idx])
+                } else {
+                    match map.tiles[idx] {
+                        TileType::Floor => *DUNGEON_FLOOR,
+                        TileType::Wall => *DUNGEON_WALL,
+                    }
                 };
                 draw_batch.set(pt - offset, ColorPair::new(tint, BLACK), glyph);
             }
