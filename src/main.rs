@@ -61,9 +61,14 @@ struct State {
     monster_systems: Schedule,
 }
 
+struct NewGameData {
+    ecs: World,
+    resources: Resources,
+}
+
 impl State {
     fn new() -> Self {
-        let (ecs, resources) = State::initialized_resources();
+        let NewGameData {ecs, resources} = State::new_game_data();
         Self {
             ecs,
             resources,
@@ -73,7 +78,7 @@ impl State {
         }
     }
 
-    fn initialized_resources() -> (World, Resources) {
+    fn new_game_data() -> NewGameData {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
@@ -89,7 +94,7 @@ impl State {
         resources.insert(TurnState::AwaitingInput);
         resources.insert(rng);
         resources.insert(map_builder.theme);
-        (ecs, resources)
+        NewGameData{ecs, resources}
     }
 
     fn game_over(&mut self, ctx: &mut BTerm) {
@@ -133,7 +138,7 @@ impl State {
             5,
             WHITE,
             BLACK,
-            "Your toen is saved, and you can return to your normal life.",
+            "Your town is saved, and you can return to your normal life.",
         );
         ctx.print_color_centered(7, GREEN, BLACK, "Press 1 to play again.");
 
@@ -143,7 +148,7 @@ impl State {
     }
 
     fn reset_game_state(&mut self) {
-        let (ecs, resources) = State::initialized_resources();
+        let NewGameData {ecs, resources} = State::new_game_data();
         self.ecs = ecs;
         self.resources = resources;
     }
