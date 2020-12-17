@@ -68,7 +68,7 @@ struct NewGameData {
 
 impl State {
     fn new() -> Self {
-        let NewGameData {ecs, resources} = State::new_game_data();
+        let NewGameData { ecs, resources } = State::new_game_data();
         Self {
             ecs,
             resources,
@@ -86,7 +86,10 @@ impl State {
         spawn_player(&mut ecs, map_builder.player_start);
         spawn_amulet_of_yala(&mut ecs, map_builder.amulet_start);
         map_builder.monster_spawns.iter().for_each(|pos| {
-            println!("Spawning monster @{:?}", pos);
+            #[cfg(debug_assertions)]
+            {
+                println!("Spawning monster @{:?}", pos);
+            }
             spawn_monster(&mut ecs, &mut rng, *pos)
         });
         resources.insert(map_builder.map);
@@ -94,7 +97,7 @@ impl State {
         resources.insert(TurnState::AwaitingInput);
         resources.insert(rng);
         resources.insert(map_builder.theme);
-        NewGameData{ecs, resources}
+        NewGameData { ecs, resources }
     }
 
     fn game_over(&mut self, ctx: &mut BTerm) {
@@ -148,7 +151,7 @@ impl State {
     }
 
     fn reset_game_state(&mut self) {
-        let NewGameData {ecs, resources} = State::new_game_data();
+        let NewGameData { ecs, resources } = State::new_game_data();
         self.ecs = ecs;
         self.resources = resources;
     }

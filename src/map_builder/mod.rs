@@ -33,18 +33,9 @@ pub struct MapBuilder {
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => {
-                println!("Rooms Architect");
-                Box::new(RoomsArchitect {})
-            }
-            1 => {
-                println!("Drunkard's walk Architect");
-                Box::new(DrunkardsWalkArchitect {})
-            }
-            _ => {
-                println!("Cellular Automata Architect");
-                Box::new(CellularAutomataArchitect {})
-            }
+            0 => Box::new(RoomsArchitect {}),
+            1 => Box::new(DrunkardsWalkArchitect {}),
+            _ => Box::new(CellularAutomataArchitect {}),
         };
         let mut mb = architect.build(rng);
         apply_prefab(&mut mb, rng);
@@ -53,13 +44,15 @@ impl MapBuilder {
             0 => Some(DungeonTheme::new()),
             _ => Some(ForestTheme::new()),
         };
-
-        println!("Amulet is at {:?}", mb.amulet_start);
-        println!(
-            "monster.spawns[{}]={:?}",
-            &mb.monster_spawns.len(),
-            &mb.monster_spawns
-        );
+        #[cfg(debug_assertions)]
+        {
+            println!("Amulet is at {:?}", mb.amulet_start);
+            println!(
+                "monster.spawns[{}]={:?}",
+                &mb.monster_spawns.len(),
+                &mb.monster_spawns
+            );
+        }
         mb
     }
 
@@ -173,6 +166,18 @@ impl MapBuilder {
         spawns
     }
 }
+
+#[cfg(not(debug_assertions))]
+pub fn display(
+    _title: &str,
+    _map: &Map,
+    _player_start: &Point,
+    _amulet_start: &Point,
+    _monster_spawns: &[Point],
+) {
+}
+
+#[cfg(debug_assertions)]
 pub fn display(
     title: &str,
     map: &Map,
