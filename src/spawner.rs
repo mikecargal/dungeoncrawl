@@ -6,7 +6,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: *PLAYER,
+            glyph: player_glyph(),
         },
         Health {
             current: 10,
@@ -39,11 +39,11 @@ pub fn spawn_monster(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Poin
 }
 
 fn goblin() -> (i32, String, FontCharType) {
-    (1, "Goblin".to_string(), *GOBLIN)
+    (1, "Goblin".to_string(), goblin_glyph())
 }
 
 fn orc() -> (i32, String, FontCharType) {
-    (2, "Orc".to_string(), *ORC)
+    (2, "Orc".to_string(), orc_glyph())
 }
 
 pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
@@ -53,7 +53,7 @@ pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: *AMULET,
+            glyph: amulet_glyph(),
         },
         Name("Amulet of Yala".to_string()),
     ));

@@ -1,18 +1,6 @@
 use crate::prelude::*;
 
-lazy_static! {
-    pub static ref DUNGEON_FLOOR: u16 = to_cp437('.');
-    pub static ref DUNGEON_WALL: u16 = to_cp437('#');
-    pub static ref FOREST_FLOOR: u16 = to_cp437(';');
-    pub static ref FOREST_WALL: u16 = to_cp437('"');
-    pub static ref GOBLIN: u16 = to_cp437('g');
-    pub static ref ORC: u16 = to_cp437('O');
-    pub static ref PLAYER: u16 = to_cp437('@');
-    pub static ref AMULET: u16 = to_cp437('|');
-}
-
 pub struct DungeonTheme {}
-
 
 impl DungeonTheme {
     pub fn new() -> Box<dyn MapTheme> {
@@ -21,10 +9,10 @@ impl DungeonTheme {
 }
 
 impl MapTheme for DungeonTheme {
-    fn tile_to_render(&self, tile_type: TileType) -> u16 {
+    fn tile_to_render(&self, tile_type: TileType) -> FontCharType {
         match tile_type {
-            TileType::Floor => *DUNGEON_FLOOR,
-            TileType::Wall => *DUNGEON_WALL,
+            TileType::Floor => dungeon_floor_glyph(),
+            TileType::Wall => dungeon_wall_glyph(),
         }
     }
 }
@@ -40,8 +28,40 @@ impl ForestTheme {
 impl MapTheme for ForestTheme {
     fn tile_to_render(&self, tile_type: TileType) -> u16 {
         match tile_type {
-            TileType::Floor => *FOREST_FLOOR,
-            TileType::Wall => *FOREST_WALL,
+            TileType::Floor => forest_floor_glyph(),
+            TileType::Wall => forest_wall_glyph(),
         }
     }
+}
+
+pub fn dungeon_floor_glyph() -> FontCharType {
+    to_cp437('.')
+}
+
+pub fn dungeon_wall_glyph() -> FontCharType {
+    to_cp437('#')
+}
+
+pub fn forest_floor_glyph() -> FontCharType {
+    to_cp437(';')
+}
+
+pub fn forest_wall_glyph() -> FontCharType {
+    to_cp437('"')
+}
+
+pub fn goblin_glyph() -> FontCharType {
+    to_cp437('g')
+}
+
+pub fn orc_glyph() -> FontCharType {
+    to_cp437('O')
+}
+
+pub fn player_glyph() -> FontCharType {
+    to_cp437('@')
+}
+
+pub fn amulet_glyph() -> FontCharType {
+    to_cp437('|')
 }

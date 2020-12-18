@@ -29,8 +29,8 @@ pub fn map_render(
                     theme.tile_to_render(map.tiles[idx])
                 } else {
                     match map.tiles[idx] {
-                        TileType::Floor => *DUNGEON_FLOOR,
-                        TileType::Wall => *DUNGEON_WALL,
+                        TileType::Floor => dungeon_floor_glyph(),
+                        TileType::Wall => dungeon_wall_glyph(),
                     }
                 };
                 draw_batch.set(pt - offset, ColorPair::new(tint, BLACK), glyph);

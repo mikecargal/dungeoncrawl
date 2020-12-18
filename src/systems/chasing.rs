@@ -1,5 +1,7 @@
 use crate::prelude::*;
+use core::fmt;
 use std::collections::HashSet;
+use std::fmt::{Debug, Display, Formatter};
 
 #[system]
 #[read_component(Point)]
@@ -64,4 +66,13 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
                 }
             }
         });
+}
+
+#[derive(Debug)]
+struct Matrix(f32, f32, f32, f32);
+
+impl Display for Matrix {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "( {} {} )\n ( {} {} )", self.0, self.1, self.2, self.3)
+    }
 }
