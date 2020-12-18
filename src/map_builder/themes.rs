@@ -34,34 +34,43 @@ impl MapTheme for ForestTheme {
     }
 }
 
+const DUNGEON_FLOOR_CHAR: char = '.';
+const DUNGEON_WALL_CHAR: char = '.';
+const FOREST_FLOOR_CHAR: char = '.';
+const FOREST_TREE_CHAR: char = '.';
+const GOBLIN_CHAR: char = '.';
+const ORC_CHAR: char = '.';
+const PLAYER_CHAR: char = '.';
+const AMULET_CHAR: char = '.';
+
 pub fn dungeon_floor_glyph() -> FontCharType {
-    to_cp437('.')
+    to_cp437(DUNGEON_FLOOR_CHAR)
 }
 
 pub fn dungeon_wall_glyph() -> FontCharType {
-    to_cp437('#')
+    to_cp437(DUNGEON_WALL_CHAR)
 }
 
 pub fn forest_floor_glyph() -> FontCharType {
-    to_cp437(';')
+    to_cp437(FOREST_FLOOR_CHAR)
 }
 
 pub fn forest_wall_glyph() -> FontCharType {
-    to_cp437('"')
+    to_cp437(FOREST_TREE_CHAR)
 }
 
 pub fn goblin_glyph() -> FontCharType {
-    to_cp437('g')
+    to_cp437(GOBLIN_CHAR)
 }
 
 pub fn orc_glyph() -> FontCharType {
-    to_cp437('O')
+    to_cp437(ORC_CHAR)
 }
 
 pub fn player_glyph() -> FontCharType {
-    to_cp437('@')
+    to_cp437(PLAYER_CHAR)
 }
 
 pub fn amulet_glyph() -> FontCharType {
-    to_cp437('|')
+    to_cp437(AMULET_CHAR)
 }
