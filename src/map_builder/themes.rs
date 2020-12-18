@@ -35,13 +35,13 @@ impl MapTheme for ForestTheme {
 }
 
 const DUNGEON_FLOOR_CHAR: char = '.';
-const DUNGEON_WALL_CHAR: char = '.';
-const FOREST_FLOOR_CHAR: char = '.';
-const FOREST_TREE_CHAR: char = '.';
-const GOBLIN_CHAR: char = '.';
-const ORC_CHAR: char = '.';
-const PLAYER_CHAR: char = '.';
-const AMULET_CHAR: char = '.';
+const DUNGEON_WALL_CHAR: char = '#';
+const FOREST_FLOOR_CHAR: char = ';';
+const FOREST_TREE_CHAR: char = '"';
+const GOBLIN_CHAR: char = 'g';
+const ORC_CHAR: char = 'O';
+const PLAYER_CHAR: char = '@';
+const AMULET_CHAR: char = '|';
 
 pub fn dungeon_floor_glyph() -> FontCharType {
     to_cp437(DUNGEON_FLOOR_CHAR)
