@@ -32,20 +32,29 @@ pub struct MapBuilder {
     pub theme: Option<Box<dyn MapTheme>>,
 }
 
+lazy_static! {
+    static ref ARCHICTECT_CREATORS: Vec<fn() -> Box<dyn MapArchitect>> = vec![
+        || Box::new(RoomsArchitect {}),
+        || Box::new(DrunkardsWalkArchitect {}),
+        || Box::new(CellularAutomataArchitect {}),
+    ];
+}
+
+lazy_static! {
+    static ref THEME_CREATORS: Vec<fn() -> Box<dyn MapTheme>> =
+        vec![|| DungeonTheme::new(), || ForestTheme::new(),];
+}
+
+fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator) -> T {
+    creators[rng.range(0, creators.len())]()
+}
+
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
-        let mut architect: Box<dyn MapArchitect> = match rng.range(0, 3) {
-            0 => Box::new(RoomsArchitect {}),
-            1 => Box::new(DrunkardsWalkArchitect {}),
-            _ => Box::new(CellularAutomataArchitect {}),
-        };
-        let mut mb = architect.build(rng);
+        let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
         apply_prefab(&mut mb, rng);
+        mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
 
-        mb.theme = match rng.range(0, 2) {
-            0 => Some(DungeonTheme::new()),
-            _ => Some(ForestTheme::new()),
-        };
         #[cfg(debug_assertions)]
         {
             println!("Amulet is at {:?}", mb.amulet_start);
