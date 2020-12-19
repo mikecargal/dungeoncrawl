@@ -34,7 +34,7 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         SCREEN_HEIGHT,
         &vec![mb.map.point2d_to_index(mb.player_start)],
         &mb.map,
-        1024.0,
+        DISTANCE_MAX_DEPTH,
     );
 
     let mut attempts = 0;

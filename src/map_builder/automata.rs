@@ -6,6 +6,7 @@ pub struct CellularAutomataArchitect {}
 
 impl MapArchitect for CellularAutomataArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
+        const ITERATION_COUNT: i32 = 10;
         let mut mb = MapBuilder {
             map: Map::new(),
             rooms: vec![],
@@ -15,7 +16,7 @@ impl MapArchitect for CellularAutomataArchitect {
             theme: None,
         };
         self.random_noise_map(rng, &mut mb.map);
-        for _ in 0..10 {
+        for _ in 0..=ITERATION_COUNT {
             self.iteration(&mut mb.map)
         }
         let start = self.find_start(&mb.map);
@@ -35,6 +36,7 @@ impl MapArchitect for CellularAutomataArchitect {
 
 impl CellularAutomataArchitect {
     fn random_noise_map(&mut self, rng: &mut RandomNumberGenerator, map: &mut Map) {
+        const PERCENT_FLOOR: i32 = 55;
         let bounds = map.dimensions();
         let idx_to_point = |idx: usize| {
             let w = bounds.x as usize;
@@ -47,7 +49,7 @@ impl CellularAutomataArchitect {
                 return;
             }
             let roll = rng.range(0, 100);
-            if roll > 55 {
+            if roll > PERCENT_FLOOR {
                 *t = TileType::Floor;
             } else {
                 *t = TileType::Wall;
@@ -68,13 +70,18 @@ impl CellularAutomataArchitect {
     }
 
     fn iteration(&mut self, map: &mut Map) {
+        const MAX_NEIGHBORS: usize = 4;
+
         let mut new_tiles = map.tiles.clone();
 
         for y in 1..SCREEN_HEIGHT - 1 {
             for x in 1..SCREEN_WIDTH - 1 {
                 let neighbors = self.count_neighbors(x, y, map);
                 let idx = map_idx(x, y);
-                if neighbors > 4 || neighbors == 0 || !Map::in_floor_bounds(Point::new(x, y)) {
+                if neighbors > MAX_NEIGHBORS || //.
+                  neighbors == 0 || //.
+                     !Map::in_floor_bounds(Point::new(x, y))
+                {
                     new_tiles[idx] = TileType::Wall
                 } else {
                     new_tiles[idx] = TileType::Floor;

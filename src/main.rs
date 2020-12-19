@@ -39,17 +39,34 @@ pub mod prelude {
         pub z_order: usize,
     }
 
-    pub const BACKGROUND_LAYER: LayerDef = LayerDef { id: 0, z_order: 0 };
-    pub const HUD_LAYER: LayerDef = LayerDef {
-        id: 2,
-        z_order: BACKGROUND_LAYER.z_order + 10_000,
+    const BACKGROUND_LAYER_ID: usize = 0;
+    const BACKGROUND_LAYER_Z_ORDER: usize = 0;
+
+    const ENTITY_LAYER_ID: usize = 1;
+    const ENTITY_LAYER_Z_ORDER: usize = BACKGROUND_LAYER_Z_ORDER + 5_000;
+
+    const HUD_ID: usize = 2;
+    const HUD_LAYER_Z_ORDER: usize = ENTITY_LAYER_Z_ORDER + 5_000;
+
+    pub const BACKGROUND_LAYER: LayerDef = LayerDef {
+        id: BACKGROUND_LAYER_ID,
+        z_order: BACKGROUND_LAYER_Z_ORDER,
     };
     pub const ENTITY_LAYER: LayerDef = LayerDef {
-        id: 1,
-        z_order: HUD_LAYER.z_order + 5_000,
+        id: ENTITY_LAYER_ID,
+        z_order: ENTITY_LAYER_Z_ORDER,
+    };
+    pub const HUD_LAYER: LayerDef = LayerDef {
+        id: HUD_ID,
+        z_order: HUD_LAYER_Z_ORDER,
     };
 
+    pub const DISTANCE_MAX_DEPTH: f32 = 1024.0;
     pub const RENDER_LAYERS: [LayerDef; 3] = [BACKGROUND_LAYER, ENTITY_LAYER, HUD_LAYER];
+
+    pub fn fifty_fifty(rng: &mut RandomNumberGenerator) -> bool {
+        rng.range(0, 2) == 1
+    }
 }
 
 use prelude::*;

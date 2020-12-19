@@ -34,9 +34,21 @@ pub struct MapBuilder {
 
 lazy_static! {
     static ref ARCHICTECT_CREATORS: Vec<fn() -> Box<dyn MapArchitect>> = vec![
-        || Box::new(RoomsArchitect {}),
-        || Box::new(DrunkardsWalkArchitect {}),
-        || Box::new(CellularAutomataArchitect {}),
+        || {
+            #[cfg(debug_assertions)]
+            println!("Rooms Architect");
+            Box::new(RoomsArchitect {})
+        },
+        || {
+            #[cfg(debug_assertions)]
+            println!("DrunkardsWalk Architect");
+            Box::new(DrunkardsWalkArchitect {})
+        },
+        || {
+            #[cfg(debug_assertions)]
+            println!("Cellular Automata Architect");
+            Box::new(CellularAutomataArchitect {})
+        },
     ];
 }
 
@@ -52,6 +64,7 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
+        // let mut mb = ARCHICTECT_CREATORS[1]().build(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
 
@@ -77,7 +90,7 @@ impl MapBuilder {
             SCREEN_HEIGHT,
             &vec![self.map.point2d_to_index(self.player_start)],
             &self.map,
-            1024.0,
+            DISTANCE_MAX_DEPTH,
         );
 
         self.map.index_to_point2d(
@@ -93,12 +106,14 @@ impl MapBuilder {
     }
 
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
+        const ROOM_MIN_DIMENSION: i32 = 2;
+        const ROOM_MAX_DIMENSION: i32 = 10;
         while self.rooms.len() < NUM_ROOMS {
             let room = Rect::with_size(
-                rng.range(1, SCREEN_WIDTH - 10),
-                rng.range(1, SCREEN_HEIGHT - 10),
-                rng.range(2, 10),
-                rng.range(2, 10),
+                rng.range(1, SCREEN_WIDTH - ROOM_MAX_DIMENSION),
+                rng.range(1, SCREEN_HEIGHT - ROOM_MAX_DIMENSION),
+                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_DIMENSION + 1),
+                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_DIMENSION + 1),
             );
             let mut overlap = false;
             for r in self.rooms.iter() {
@@ -143,7 +158,7 @@ impl MapBuilder {
             let prev = rooms[i - 1].center();
             let new = room.center();
 
-            if rng.range(0, 2) == 1 {
+            if fifty_fifty(rng) {
                 self.apply_horizontal_tunnel(prev.x, new.x, prev.y);
                 self.apply_vertical_tunnel(prev.y, new.y, new.x);
             } else {
@@ -155,6 +170,7 @@ impl MapBuilder {
 
     fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
         const NUM_MONSTERS: usize = 50;
+        const MIN_MONSTER_DISTANCE: f32 = 10.0;
         let mut spawnable_tiles: Vec<Point> = self
             .map
             .tiles
@@ -163,7 +179,7 @@ impl MapBuilder {
             .filter(|(idx, t)| {
                 **t == TileType::Floor
                     && DistanceAlg::Pythagoras.distance2d(*start, self.map.index_to_point2d(*idx))
-                        > 10.0
+                        >= MIN_MONSTER_DISTANCE
             })
             .map(|(idx, _)| self.map.index_to_point2d(idx))
             .collect();
@@ -196,18 +212,25 @@ pub fn display(
     amulet_start: &Point,
     monster_spawns: &[Point],
 ) {
+    //----- Display Chars
+    const FLOOR: char = '.';
+    const WALL: char = '#';
+    const PLAYER: char = '@';
+    const AMULET: char = 'A';
+    const MONSTER: char = 'M';
+
     use colored::*;
     let mut output = vec!['.'; NUM_TILES];
 
     map.tiles.iter().enumerate().for_each(|(idx, t)| match *t {
-        TileType::Floor => output[idx] = '.',
-        TileType::Wall => output[idx] = '#',
+        TileType::Floor => output[idx] = FLOOR,
+        TileType::Wall => output[idx] = WALL,
     });
 
-    output[map.point2d_to_index(*player_start)] = '@';
-    output[map.point2d_to_index(*amulet_start)] = 'A';
+    output[map.point2d_to_index(*player_start)] = PLAYER;
+    output[map.point2d_to_index(*amulet_start)] = AMULET;
     monster_spawns.iter().for_each(|p| {
-        output[map.point2d_to_index(*p)] = 'M';
+        output[map.point2d_to_index(*p)] = MONSTER;
     });
 
     //print!("\x1B[2J");
@@ -218,10 +241,10 @@ pub fn display(
     for y in 0..SCREEN_HEIGHT {
         for x in 0..SCREEN_WIDTH {
             match output[map_idx(x, y)] {
-                '#' => print!("{}", "#".bright_green()),
-                '@' => print!("{}", "@".bright_yellow()),
-                'M' => print!("{}", "M".bright_red()),
-                'A' => print!("{}", "A".bright_magenta()),
+                WALL => print!("{}", WALL.to_string().bright_green()),
+                PLAYER => print!("{}", PLAYER.to_string().bright_yellow()),
+                MONSTER => print!("{}", MONSTER.to_string().bright_red()),
+                AMULET => print!("{}", AMULET.to_string().bright_magenta()),
                 _ => print!("{}", ".".truecolor(64, 64, 64)),
             }
         }
