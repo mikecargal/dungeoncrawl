@@ -9,16 +9,17 @@ pub fn hud(ecs: &SubWorld) {
 
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(HUD_LAYER.id);
-    draw_batch.print_centered(1, "Explore the Dungeon.  Cursor keys to move.");
+    draw_batch.print_centered(0, "Explore the Dungeon.  Cursor keys to move.");
+    let health_x = (SCREEN_HEIGHT - 1) * 2;
     draw_batch.bar_horizontal(
-        Point::zero(),
+        Point::new(0, health_x),
         SCREEN_WIDTH * 2,
         player_health.current,
         player_health.max,
         ColorPair::new(RED, BLACK),
     );
     draw_batch.print_color_centered(
-        0,
+        health_x,
         format!(
             " Health: {} / {} ",
             player_health.current, player_health.max
