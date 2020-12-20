@@ -63,6 +63,24 @@ impl Map {
             None
         }
     }
+
+    pub fn distance(&self, pt_a: Point, pt_b: Point) -> f32 {
+        let dijkstra_map = DijkstraMap::new(
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            &vec![self.point2d_to_index(pt_a)],
+            self,
+            DISTANCE_MAX_DEPTH,
+        );
+        let pt_b_idx = self.point2d_to_index(pt_b);
+        *dijkstra_map
+            .map
+            .iter()
+            .enumerate()
+            .find(|(idx, _)| *idx == pt_b_idx)
+            .unwrap()
+            .1
+    }
 }
 
 impl BaseMap for Map {

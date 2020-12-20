@@ -11,8 +11,8 @@ impl MapArchitect for CellularAutomataArchitect {
             map: Map::new(),
             rooms: vec![],
             monster_spawns: vec![],
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
+            player_start: None,
+            amulet_start: None,
             theme: None,
         };
         self.random_noise_map(rng, &mut mb.map);
@@ -21,13 +21,13 @@ impl MapArchitect for CellularAutomataArchitect {
         }
         let start = self.find_start(&mb.map);
         mb.monster_spawns = mb.spawn_monsters(&start, rng);
-        mb.player_start = start;
-        mb.amulet_start = mb.find_most_distant();
+        mb.player_start = Some(start);
+        mb.amulet_start = Some(mb.find_most_distant());
         display(
             "Automata Map ",
             &mb.map,
-            &mb.player_start,
-            &mb.amulet_start,
+            &mb.player_start.unwrap(),
+            &mb.amulet_start.unwrap(),
             &mb.monster_spawns,
         );
         mb

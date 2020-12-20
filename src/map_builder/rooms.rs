@@ -8,26 +8,24 @@ impl MapArchitect for RoomsArchitect {
             map: Map::new(),
             rooms: Vec::new(),
             monster_spawns: Vec::new(),
-            player_start: Point::zero(),
-            amulet_start: Point::zero(),
+            player_start: None,
+            amulet_start: None,
             theme: None,
         };
 
         mb.fill(TileType::Wall);
         mb.build_random_rooms(rng);
         mb.build_corridors(rng);
-        mb.player_start = mb.rooms[0].center();
-        mb.amulet_start = mb.find_most_distant();
+        mb.player_start = Some(mb.rooms[0].center());
+        mb.amulet_start = Some(mb.find_most_distant());
         for room in mb.rooms.iter().skip(1) {
-            #[cfg(debug_assertions)]
-            println!("Place monster @ {:?}", room.center());
             mb.monster_spawns.push(room.center());
         }
         display(
             "Rooms Map ",
             &mb.map,
-            &mb.player_start,
-            &mb.amulet_start,
+            &mb.player_start.unwrap(),
+            &mb.amulet_start.unwrap(),
             &mb.monster_spawns,
         );
         mb

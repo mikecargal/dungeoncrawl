@@ -12,7 +12,6 @@ use drunkard::DrunkardsWalkArchitect;
 use prefab::apply_prefab;
 use rooms::RoomsArchitect;
 use std::cmp::{max, min};
-
 pub use themes::*;
 
 const NUM_ROOMS: usize = 20;
@@ -27,8 +26,8 @@ pub struct MapBuilder {
     pub map: Map,
     pub rooms: Vec<Rect>,
     pub monster_spawns: Vec<Point>,
-    pub player_start: Point,
-    pub amulet_start: Point,
+    pub player_start: Option<Point>,
+    pub amulet_start: Option<Point>,
     pub theme: Option<Box<dyn MapTheme>>,
 }
 
@@ -72,10 +71,15 @@ impl MapBuilder {
         {
             println!("Amulet is at {:?}", mb.amulet_start);
             println!(
-                "monster.spawns[{}]={:?}",
-                &mb.monster_spawns.len(),
-                &mb.monster_spawns
-            );
+                "amulet is {} steps from player",
+                mb.map
+                    .distance(mb.player_start.unwrap(), mb.amulet_start.unwrap())
+            )
+            // println!(
+            //     "monster.spawns[{}]={:?}",
+            //     &mb.monster_spawns.len(),
+            //     &mb.monster_spawns
+            // );
         }
         mb
     }
@@ -88,7 +92,10 @@ impl MapBuilder {
         let dijkstra_map = DijkstraMap::new(
             SCREEN_WIDTH,
             SCREEN_HEIGHT,
-            &vec![self.map.point2d_to_index(self.player_start)],
+            &vec![self.map.point2d_to_index(
+                self.player_start
+                    .expect("Can't find distance from non-existent player"),
+            )],
             &self.map,
             DISTANCE_MAX_DEPTH,
         );

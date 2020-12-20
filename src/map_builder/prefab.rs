@@ -32,7 +32,10 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     let dijkstra_map = DijkstraMap::new(
         SCREEN_WIDTH,
         SCREEN_HEIGHT,
-        &vec![mb.map.point2d_to_index(mb.player_start)],
+        &vec![mb.map.point2d_to_index(
+            mb.player_start
+                .expect("Can't build dijkstra map without a player"),
+        )],
         &mb.map,
         DISTANCE_MAX_DEPTH,
     );
@@ -49,7 +52,12 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         let can_place = dimensions.point_set().iter().all(|pt| {
             let idx = mb.map.point2d_to_index(*pt);
             let distance = dijkstra_map.map[idx];
-            distance < 2000.0 && distance > 20.0 && *pt == mb.amulet_start
+            distance < 2000.0
+                && distance > 20.0
+                && *pt
+                    == mb
+                        .amulet_start
+                        .expect("Can't test placement without an amulet")
         });
 
         if can_place {
