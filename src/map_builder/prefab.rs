@@ -41,7 +41,7 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         .collect();
 
     let mut amulet_offsets = Vec::new();
-    for (idx, (y, x)) in iproduct!(0..FORTRESS.y, 0..FORTRESS.x).enumerate() {
+    for (idx, (y, x)) in (0..FORTRESS.y).cartesian_product(0..FORTRESS.x).enumerate() {
         if fortress_vec[idx] == POSSIBLER_AMULET_POS {
             amulet_offsets.push(Point { x, y })
         }
@@ -69,11 +69,9 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     #[cfg(debug_assertions)]
     println!("Prefab placed at {:?}", &placement);
 
-    for (i, (ty, tx)) in iproduct!(
-        placement.y..placement.y + FORTRESS.y,
-        placement.x..placement.x + FORTRESS.x
-    )
-    .enumerate()
+    for (i, (ty, tx)) in (placement.y..placement.y + FORTRESS.y)
+        .cartesian_product(placement.x..placement.x + FORTRESS.x)
+        .enumerate()
     {
         let idx = map_idx(tx, ty);
         match fortress_vec[i] {
