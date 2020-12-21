@@ -49,13 +49,6 @@ impl MapArchitect for DrunkardsWalkArchitect {
             mb.amulet_start = Some(mb.find_most_distant());
         }
         mb.monster_spawns = mb.spawn_monsters(&center, rng);
-        display(
-            "Drunken Map ",
-            &mb.map,
-            &mb.player_start.unwrap(),
-            &mb.amulet_start.unwrap(),
-            &mb.monster_spawns,
-        );
         mb
     }
 }

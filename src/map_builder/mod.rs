@@ -63,23 +63,24 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
-        // let mut mb = ARCHICTECT_CREATORS[1]().build(rng);
+        // let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
-
         #[cfg(debug_assertions)]
         {
+            display(
+                "Map ",
+                &mb.map,
+                &mb.player_start.unwrap(),
+                &mb.amulet_start.unwrap(),
+                &mb.monster_spawns,
+            );
             println!("Amulet is at {:?}", mb.amulet_start);
             println!(
                 "amulet is {} steps from player",
                 mb.map
                     .distance(mb.player_start.unwrap(), mb.amulet_start.unwrap())
             )
-            // println!(
-            //     "monster.spawns[{}]={:?}",
-            //     &mb.monster_spawns.len(),
-            //     &mb.monster_spawns
-            // );
         }
         mb
     }
@@ -201,17 +202,6 @@ impl MapBuilder {
     }
 }
 
-#[cfg(not(debug_assertions))]
-pub fn display(
-    _title: &str,
-    _map: &Map,
-    _player_start: &Point,
-    _amulet_start: &Point,
-    _monster_spawns: &[Point],
-) {
-}
-
-#[cfg(debug_assertions)]
 pub fn display(
     title: &str,
     map: &Map,

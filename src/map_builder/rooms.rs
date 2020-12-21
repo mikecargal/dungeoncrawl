@@ -21,13 +21,13 @@ impl MapArchitect for RoomsArchitect {
         for room in mb.rooms.iter().skip(1) {
             mb.monster_spawns.push(room.center());
         }
-        display(
-            "Rooms Map ",
-            &mb.map,
-            &mb.player_start.unwrap(),
-            &mb.amulet_start.unwrap(),
-            &mb.monster_spawns,
-        );
+        // display(
+        //     "Rooms Map ",
+        //     &mb.map,
+        //     &mb.player_start.unwrap(),
+        //     &mb.amulet_start.unwrap(),
+        //     &mb.monster_spawns,
+        // );
         mb
     }
 }

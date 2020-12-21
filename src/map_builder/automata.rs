@@ -23,13 +23,6 @@ impl MapArchitect for CellularAutomataArchitect {
         mb.monster_spawns = mb.spawn_monsters(&start, rng);
         mb.player_start = Some(start);
         mb.amulet_start = Some(mb.find_most_distant());
-        display(
-            "Automata Map ",
-            &mb.map,
-            &mb.player_start.unwrap(),
-            &mb.amulet_start.unwrap(),
-            &mb.monster_spawns,
-        );
         mb
     }
 }
