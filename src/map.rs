@@ -44,10 +44,10 @@ impl Map {
     }
 
     pub fn try_idx(&self, point: Point) -> Option<usize> {
-        if !self.in_bounds(point) {
-            None
-        } else {
+        if self.in_bounds(point) {
             Some(map_idx(point.x, point.y))
+        } else {
+            None
         }
     }
 
@@ -82,33 +82,42 @@ impl Map {
             .1
     }
 }
+lazy_static! {
+    static ref LEFT: Point = Point::new(-1, 0);
+    static ref RIGHT: Point = Point::new(1, 0);
+    static ref UP: Point = Point::new(0, -1);
+    static ref DOWN: Point = Point::new(0, 1);
+}
 
 impl BaseMap for Map {
+    fn is_opaque(&self, idx: usize) -> bool {
+        self.tiles[idx as usize] != TileType::Floor
+    }
+
     fn get_available_exits(&self, idx: usize) -> SmallVec<[(usize, f32); 10]> {
         let mut exits = SmallVec::new();
         let location = self.index_to_point2d(idx);
 
-        if let Some(idx) = self.valid_exit(location, Point::new(-1, 0)) {
+        if let Some(idx) = self.valid_exit(location, *LEFT) {
             exits.push((idx, 1.0))
         }
-        if let Some(idx) = self.valid_exit(location, Point::new(1, 0)) {
+        if let Some(idx) = self.valid_exit(location, *RIGHT) {
             exits.push((idx, 1.0))
         }
-        if let Some(idx) = self.valid_exit(location, Point::new(0, -1)) {
+        if let Some(idx) = self.valid_exit(location, *UP) {
             exits.push((idx, 1.0))
         }
-        if let Some(idx) = self.valid_exit(location, Point::new(0, 1)) {
+        if let Some(idx) = self.valid_exit(location, *DOWN) {
             exits.push((idx, 1.0))
         }
         exits
     }
 
     fn get_pathing_distance(&self, idx1: usize, idx2: usize) -> f32 {
-        DistanceAlg::Pythagoras.distance2d(self.index_to_point2d(idx1), self.index_to_point2d(idx2))
-    }
-
-    fn is_opaque(&self, idx: usize) -> bool {
-        self.tiles[idx as usize] != TileType::Floor
+        DistanceAlg::Pythagoras.distance2d(
+            self.index_to_point2d(idx1), //.
+            self.index_to_point2d(idx2),
+        )
     }
 }
 
