@@ -14,7 +14,7 @@ use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 pub use themes::*;
 
-const NUM_ROOMS: usize = 20;
+const NUM_ROOMS: usize = (SCREEN_WIDTH * SCREEN_HEIGHT / 20) as usize; //20;
 
 const UNREACHABLE: f32 = std::f32::MAX;
 
@@ -62,8 +62,8 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
-        let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
-        // let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
+        //let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
+        let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
         #[cfg(debug_assertions)]
@@ -115,13 +115,16 @@ impl MapBuilder {
 
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
         const ROOM_MIN_DIMENSION: i32 = 2;
-        const ROOM_MAX_DIMENSION: i32 = 10;
-        while self.rooms.len() < NUM_ROOMS {
+        const ROOM_MAX_WIDTH: i32 = 10;
+        const ROOM_MAX_HEIGHT: i32 = SCREEN_WIDTH * ROOM_MAX_WIDTH / SCREEN_HEIGHT;
+        const MAX_ATTEMPTS: i32 = 1_000;
+        let mut attempts = 0;
+        while self.rooms.len() < NUM_ROOMS && attempts < MAX_ATTEMPTS {
             let room = Rect::with_size(
-                rng.range(1, SCREEN_WIDTH - ROOM_MAX_DIMENSION),
-                rng.range(1, SCREEN_HEIGHT - ROOM_MAX_DIMENSION),
-                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_DIMENSION + 1),
-                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_DIMENSION + 1),
+                rng.range(1, SCREEN_WIDTH - ROOM_MAX_WIDTH),
+                rng.range(1, SCREEN_HEIGHT - ROOM_MAX_HEIGHT),
+                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_WIDTH + 1),
+                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_HEIGHT + 1),
             );
             let mut overlap = false;
             for r in self.rooms.iter() {
@@ -140,6 +143,7 @@ impl MapBuilder {
                 });
                 self.rooms.push(room)
             }
+            attempts += 1;
         }
     }
 
@@ -161,7 +165,13 @@ impl MapBuilder {
 
     fn build_corridors(&mut self, rng: &mut RandomNumberGenerator) {
         let mut rooms = self.rooms.clone();
-        rooms.sort_by(|a, b| a.center().x.cmp(&b.center().x));
+        rooms.sort_by(|a, b| {
+            let ac = a.center();
+            let bc = b.center();
+            let av = ac.x+ac.y;
+            let bv = bc.x+bc.y;
+            av.cmp(&bv)
+        });
         for (i, room) in rooms.iter().enumerate().skip(1) {
             let prev = rooms[i - 1].center();
             let new = room.center();
