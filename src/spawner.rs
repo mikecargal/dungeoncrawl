@@ -1,5 +1,8 @@
 use crate::prelude::*;
 
+const PLAYER_MAX_HEALTH: i32 = 10;
+const PLAYER_SIGHT_DISTANCE: i32 = 8;
+const MONSTER_SIGHT_DISTANCE: i32 = 6;
 pub fn spawn_player(ecs: &mut World, pos: Point) {
     ecs.push((
         Player,
@@ -9,10 +12,10 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
             glyph: player_glyph(),
         },
         Health {
-            current: 10,
-            max: 10,
+            current: PLAYER_MAX_HEALTH,
+            max: PLAYER_MAX_HEALTH,
         },
-        FieldOfView::new(8),
+        FieldOfView::new(PLAYER_SIGHT_DISTANCE),
     ));
 }
 
@@ -34,7 +37,7 @@ pub fn spawn_monster(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Poin
             max: hp,
         },
         Name(name),
-        FieldOfView::new(6),
+        FieldOfView::new(MONSTER_SIGHT_DISTANCE),
     ));
 }
 
