@@ -541,6 +541,7 @@ version = "0.1.0"
 dependencies = [
  "bracket-lib",
  "colored",
+ "itertools",
  "lazy_static",
  "legion",
 ]

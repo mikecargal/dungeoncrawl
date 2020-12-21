@@ -41,13 +41,9 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         .collect();
 
     let mut amulet_offsets = Vec::new();
-    let mut idx = 0;
-    for y in 0..FORTRESS.y {
-        for x in 0..FORTRESS.x {
-            if fortress_vec[idx] == POSSIBLER_AMULET_POS {
-                amulet_offsets.push(Point { x, y })
-            }
-            idx += 1;
+    for (idx, (y, x)) in iproduct!(0..FORTRESS.y, 0..FORTRESS.x).enumerate() {
+        if fortress_vec[idx] == POSSIBLER_AMULET_POS {
+            amulet_offsets.push(Point { x, y })
         }
     }
 
@@ -73,25 +69,22 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
     #[cfg(debug_assertions)]
     println!("Prefab placed at {:?}", &placement);
 
-    let mut i = 0;
-    for ty in placement.y..placement.y + FORTRESS.y {
-        for tx in placement.x..placement.x + FORTRESS.x {
-            let idx = map_idx(tx, ty);
-            match fortress_vec[i] {
-                POSSIBLER_AMULET_POS
-                    if mb.map.index_to_point2d(idx) == mb.amulet_start.unwrap() =>
-                {
-                    ()
-                }
-                POSSIBLER_AMULET_POS | OUTSIDE_FLOOR => mb.map.tiles[idx] = TileType::Floor,
-                MONSTER => {
-                    mb.map.tiles[idx] = TileType::Floor;
-                    mb.monster_spawns.push(Point::new(tx, ty));
-                }
-                WALL => mb.map.tiles[idx] = TileType::Wall,
-                c => println!("No idea what to do with [{}]", c),
+    for (i, (ty, tx)) in iproduct!(
+        placement.y..placement.y + FORTRESS.y,
+        placement.x..placement.x + FORTRESS.x
+    )
+    .enumerate()
+    {
+        let idx = map_idx(tx, ty);
+        match fortress_vec[i] {
+            POSSIBLER_AMULET_POS if mb.map.index_to_point2d(idx) == mb.amulet_start.unwrap() => (),
+            POSSIBLER_AMULET_POS | OUTSIDE_FLOOR => mb.map.tiles[idx] = TileType::Floor,
+            MONSTER => {
+                mb.map.tiles[idx] = TileType::Floor;
+                mb.monster_spawns.push(Point::new(tx, ty));
             }
-            i += 1;
+            WALL => mb.map.tiles[idx] = TileType::Wall,
+            c => println!("No idea what to do with [{}]", c),
         }
     }
 }

@@ -17,6 +17,7 @@ pub mod prelude {
     pub use crate::systems::*;
     pub use crate::turn_state::*;
     pub use bracket_lib::prelude::*;
+    pub use itertools::*;
     pub use lazy_static::*;
     pub use legion::*;
 
