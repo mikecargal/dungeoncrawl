@@ -62,8 +62,8 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
-        //let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
-        let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
+        let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
+        //let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
         #[cfg(debug_assertions)]
