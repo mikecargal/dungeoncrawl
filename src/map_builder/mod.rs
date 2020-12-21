@@ -18,7 +18,7 @@ const NUM_ROOMS: usize = 20;
 
 const UNREACHABLE: f32 = std::f32::MAX;
 
-trait MapArchitect {
+pub trait MapArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder;
 }
 
@@ -36,17 +36,17 @@ lazy_static! {
         || {
             #[cfg(debug_assertions)]
             println!("Rooms Architect");
-            Box::new(RoomsArchitect {})
+            RoomsArchitect::new()
         },
         || {
             #[cfg(debug_assertions)]
             println!("DrunkardsWalk Architect");
-            Box::new(DrunkardsWalkArchitect {})
+            DrunkardsWalkArchitect::new()
         },
         || {
             #[cfg(debug_assertions)]
             println!("Cellular Automata Architect");
-            Box::new(CellularAutomataArchitect {})
+            CellularAutomataArchitect::new()
         },
     ];
 }
@@ -230,7 +230,6 @@ pub fn display(
         output[map.point2d_to_index(*p)] = MONSTER;
     });
 
-    //print!("\x1B[2J");
     println!(
         "----------------------\n{}\n----------------------",
         title.bright_yellow()
@@ -247,11 +246,6 @@ pub fn display(
         }
         println!();
     }
-
-    //       let mut ignore_me = String::new();
-    //       stdin()
-    //           .read_line(&mut ignore_me)
-    //           .expect("Failed to read line");
 }
 
 pub trait MapTheme: Sync + Send {

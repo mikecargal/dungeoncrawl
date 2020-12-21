@@ -54,20 +54,32 @@ impl MapArchitect for DrunkardsWalkArchitect {
 }
 
 fn map_is_complete(mb: &MapBuilder) -> bool {
-    mb.map
+    if mb.amulet_start.is_none() {
+        return false;
+    }
+
+    let floor_tile_count = mb
+        .map
         .tiles
         .iter()
         .filter(|t| **t == TileType::Floor)
-        .count()
-        >= DESIRED_FLOOR
-        && (mb.amulet_start.is_some()
-            && mb.map.distance(
-                mb.player_start.expect("No player!"),
-                mb.amulet_start.expect("No amulet!"),
-            ) < MIN_AMULET_DISTANCE)
+        .count();
+    if floor_tile_count < DESIRED_FLOOR {
+        return false;
+    }
+
+    let amulet_distance = mb.map.distance(
+        mb.player_start.expect("No player!"),
+        mb.amulet_start.unwrap(),
+    );
+    amulet_distance < MIN_AMULET_DISTANCE
 }
 
 impl DrunkardsWalkArchitect {
+    pub fn new() -> Box<dyn MapArchitect> {
+        Box::new(Self {})
+    }
+
     fn drunkard(&mut self, start: &Point, rng: &mut RandomNumberGenerator, map: &mut Map) {
         let mut drunkard_pos = start.clone();
         for _ in 0..=STAGGER_DISTANCE {

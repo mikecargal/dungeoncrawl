@@ -25,3 +25,10 @@ impl MapArchitect for EmptyArchitect {
         mb
     }
 }
+
+#[allow(dead_code)]
+impl EmptyArchitect {
+    pub fn new() -> Box<dyn MapArchitect> {
+        Box::new(Self {})
+    }
+}

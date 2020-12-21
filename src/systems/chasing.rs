@@ -38,27 +38,22 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
                 } else {
                     *player_pos
                 };
-                let mut attacked = false;
-                positions
+                let attacked = positions
                     .iter(ecs)
-                    .filter(|(_, target_pos, _)| **target_pos == destination)
-                    .for_each(|(victim, _, _)| {
-                        if ecs
-                            .entry_ref(*victim)
-                            .unwrap()
-                            .get_component::<Player>()
-                            .is_ok()
-                        {
-                            commands.push((
-                                (),
-                                WantsToAttack {
-                                    attacker: *entity,
-                                    victim: *victim,
-                                },
-                            ));
-                        }
-                        attacked = true;
-                    });
+                    .filter(|(victim, target_pos, _)| {
+                        **target_pos == destination && victim_is_player(victim, ecs)
+                    })
+                    .inspect(|(victim, _, _)| {
+                        commands.push((
+                            (),
+                            WantsToAttack {
+                                attacker: *entity,
+                                victim: **victim,
+                            },
+                        ));
+                    })
+                    .count()
+                    > 0;
 
                 if !attacked && !requested_destinations.contains(&destination) {
                     requested_destinations.insert(destination);
@@ -72,6 +67,13 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
                 }
             }
         });
+}
+
+fn victim_is_player(victim: &Entity, ecs: &SubWorld) -> bool {
+    ecs.entry_ref(*victim)
+        .unwrap()
+        .get_component::<Player>()
+        .is_ok()
 }
 
 #[derive(Debug)]
