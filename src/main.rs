@@ -24,8 +24,8 @@ pub mod prelude {
     pub use legion::systems::CommandBuffer;
     pub use legion::world::SubWorld;
 
-    pub const SCREEN_WIDTH: i32 = 80;
-    pub const SCREEN_HEIGHT: i32 = 50;
+    pub const SCREEN_WIDTH: i32 = 120;
+    pub const SCREEN_HEIGHT: i32 = 80;
     pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
     pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
     pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
@@ -129,7 +129,7 @@ impl State {
             4,
             WHITE,
             BLACK,
-            "Slain by a monster, your her's journey has come to a premature end.",
+            "Slain by a monster, your hero's journey has come to a premature end.",
         );
         ctx.print_color_centered(
             5,
@@ -157,7 +157,7 @@ impl State {
             4,
             WHITE,
             BLACK,
-            "You put on the Amulet of Yala and feel its power course through your veins..",
+            "You put on the Amulet of Yala and feel its power course through your veins...",
         );
         ctx.print_color_centered(
             5,

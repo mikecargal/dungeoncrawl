@@ -1,10 +1,10 @@
 use super::MapArchitect;
 use crate::prelude::*;
 
-const STAGGER_DISTANCE: usize = 400;
+const STAGGER_DISTANCE: usize = ((SCREEN_HEIGHT * SCREEN_WIDTH) / 5) as usize;
 const NUM_TILES: usize = (SCREEN_HEIGHT * SCREEN_WIDTH) as usize;
 const DESIRED_FLOOR: usize = NUM_TILES / 3;
-const MIN_AMULET_DISTANCE: f32 = 80.0;
+const MIN_AMULET_DISTANCE: f32 = (SCREEN_HEIGHT * SCREEN_WIDTH) as f32 / 25.0;
 pub struct DrunkardsWalkArchitect {}
 
 impl MapArchitect for DrunkardsWalkArchitect {

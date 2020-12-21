@@ -14,7 +14,7 @@ use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 pub use themes::*;
 
-const NUM_ROOMS: usize = (SCREEN_WIDTH * SCREEN_HEIGHT / 20) as usize; //20;
+const NUM_ROOMS: usize = (SCREEN_WIDTH * SCREEN_HEIGHT / 100) as usize; //20;
 
 const UNREACHABLE: f32 = std::f32::MAX;
 
@@ -63,7 +63,7 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 impl MapBuilder {
     pub fn build(rng: &mut RandomNumberGenerator) -> Self {
         let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
-        //let mut mb = ARCHICTECT_CREATORS[0]().build(rng);
+        // let mut mb = ARCHICTECT_CREATORS[2]().build(rng);
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
         #[cfg(debug_assertions)]
@@ -168,8 +168,8 @@ impl MapBuilder {
         rooms.sort_by(|a, b| {
             let ac = a.center();
             let bc = b.center();
-            let av = ac.x+ac.y;
-            let bv = bc.x+bc.y;
+            let av = ac.x + ac.y;
+            let bv = bc.x + bc.y;
             av.cmp(&bv)
         });
         for (i, room) in rooms.iter().enumerate().skip(1) {
@@ -187,7 +187,7 @@ impl MapBuilder {
     }
 
     fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
-        const NUM_MONSTERS: usize = 50;
+        const NUM_MONSTERS: usize = (SCREEN_HEIGHT * SCREEN_HEIGHT / 40) as usize;
         const MIN_MONSTER_DISTANCE: f32 = 10.0;
         let mut spawnable_tiles: Vec<Point> = self
             .map
