@@ -1,5 +1,12 @@
 use crate::prelude::*;
 
+lazy_static! {
+    static ref MOVE_LEFT: Point = Point::new(-1, 0);
+    static ref MOVE_RIGHT: Point = Point::new(1, 0);
+    static ref MOVE_UP: Point = Point::new(0, -1);
+    static ref MOVE_DOWN: Point = Point::new(0, 1);
+    static ref DONT_MOVE: Point = Point::zero();
+}
 #[system]
 #[read_component(Point)]
 #[read_component(Player)]
@@ -18,17 +25,18 @@ pub fn player_input(
         let mut did_something = false;
 
         let delta = match key {
-            VirtualKeyCode::Left => Point::new(-1, 0),
-            VirtualKeyCode::Right => Point::new(1, 0),
-            VirtualKeyCode::Up => Point::new(0, -1),
-            VirtualKeyCode::Down => Point::new(0, 1),
-            _ => Point::new(0, 0),
+            VirtualKeyCode::Left => *MOVE_LEFT,
+            VirtualKeyCode::Right => *MOVE_RIGHT,
+            VirtualKeyCode::Up => *MOVE_UP,
+            VirtualKeyCode::Down => *MOVE_DOWN,
+            _ => *DONT_MOVE,
         };
         let (player_entity, destination) = players
             .iter(ecs)
             .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
             .unwrap();
-        if delta.x != 0 || delta.y != 0 {
+        if delta != *DONT_MOVE {
+            //delta.x != 0 || delta.y != 0 {
             let mut hit_something = false;
             enemies
                 .iter(ecs)
