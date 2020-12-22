@@ -2,6 +2,7 @@
 
 mod camera;
 mod components;
+mod config;
 mod map;
 mod map_builder;
 mod spawner;
@@ -11,6 +12,7 @@ mod turn_state;
 pub mod prelude {
     pub use crate::camera::*;
     pub use crate::components::*;
+    pub use crate::config::*;
     pub use crate::map::*;
     pub use crate::map_builder::*;
     pub use crate::spawner::*;
@@ -78,6 +80,7 @@ struct State {
     input_systems: Schedule,
     player_systems: Schedule,
     monster_systems: Schedule,
+    config: Config,
 }
 
 struct NewGameData {
@@ -86,22 +89,23 @@ struct NewGameData {
 }
 
 impl State {
-    fn new() -> Self {
-        let NewGameData { ecs, resources } = State::new_game_data();
+    fn new(config: Config) -> Self {
+        let NewGameData { ecs, resources } = State::new_game_data(&config);
         Self {
             ecs,
             resources,
             input_systems: build_input_schedule(),
             player_systems: build_player_schedule(),
             monster_systems: build_monster_schedule(),
+            config,
         }
     }
 
-    fn new_game_data() -> NewGameData {
+    fn new_game_data(config: &Config) -> NewGameData {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::build(&mut rng);
+        let map_builder = MapBuilder::build(&config,&mut rng);
         spawn_player(
             &mut ecs,
             map_builder.player_start.expect("What?? No player?"),
@@ -173,7 +177,7 @@ impl State {
     }
 
     fn reset_game_state(&mut self) {
-        let NewGameData { ecs, resources } = State::new_game_data();
+        let NewGameData { ecs, resources } = Self::new_game_data(&self.config);
         self.ecs = ecs;
         self.resources = resources;
     }
@@ -207,6 +211,7 @@ impl GameState for State {
 }
 
 fn main() -> BError {
+    let config = config::parse_command_line_args();
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
         .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT)
@@ -223,5 +228,5 @@ fn main() -> BError {
         )
         .build()?;
 
-    main_loop(context, State::new())
+    main_loop(context, State::new(config))
 }

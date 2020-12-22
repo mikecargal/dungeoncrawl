@@ -31,6 +31,9 @@ pub struct MapBuilder {
     pub theme: Option<Box<dyn MapTheme>>,
 }
 
+const ROOMS_CREATOR_IDX: usize = 0;
+const DRUNKARDS_WALK_CREATOR_IDX: usize = ROOMS_CREATOR_IDX + 1;
+const CELLULAR_AUTOMATA_CREATOR_IDX: usize = DRUNKARDS_WALK_CREATOR_IDX + 1;
 lazy_static! {
     static ref ARCHICTECT_CREATORS: Vec<fn() -> Box<dyn MapArchitect>> = vec![
         || {
@@ -61,9 +64,17 @@ fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator
 }
 
 impl MapBuilder {
-    pub fn build(rng: &mut RandomNumberGenerator) -> Self {
-        let mut mb = get_random_from(&ARCHICTECT_CREATORS, rng).build(rng);
-        // let mut mb = ARCHICTECT_CREATORS[2]().build(rng);
+    pub fn build(config: &Config, rng: &mut RandomNumberGenerator) -> Self {
+        let mut mb = match config.architect {
+            ArchitectChoice::Random => get_random_from(&ARCHICTECT_CREATORS, rng).build(rng),
+            ArchitectChoice::Rooms => ARCHICTECT_CREATORS[ROOMS_CREATOR_IDX]().build(rng),
+            ArchitectChoice::CellularAutomata => {
+                ARCHICTECT_CREATORS[CELLULAR_AUTOMATA_CREATOR_IDX]().build(rng)
+            }
+            ArchitectChoice::Drunkard => {
+                ARCHICTECT_CREATORS[DRUNKARDS_WALK_CREATOR_IDX]().build(rng)
+            }
+        };
         apply_prefab(&mut mb, rng);
         mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
         #[cfg(debug_assertions)]
