@@ -105,7 +105,7 @@ impl State {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::build(&config,&mut rng);
+        let map_builder = MapBuilder::build(&config, &mut rng);
         spawn_player(
             &mut ecs,
             map_builder.player_start.expect("What?? No player?"),
