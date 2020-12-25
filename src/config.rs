@@ -33,6 +33,9 @@ enum WorldDimensionParseErrorCodes {
     BadFormat,
     InvalidWidth,
     InvalidHeight,
+    NotWideEnough,
+    NotTallEnough,
+    NotBigEnough,
 }
 #[derive(Debug, PartialEq)]
 pub struct WorldDimensionParseError {
@@ -56,6 +59,10 @@ impl FromStr for WorldDimensions {
     type Err = WorldDimensionParseError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
+        const MIN_WIDTH: i32 = 40;
+        const MIN_HEIGHT: i32 = 40;
+        const MIN_AREA: i32 = 2000;
+
         let wh: Vec<&str> = s.split('x').collect();
         if wh.len() != 2 {
             return Err(WorldDimensionParseError::new(WorldDimensionParseErrorCodes::BadFormat, "World Dimensions should we expressed as WxH where W and H are the width and height.".to_string() ));
@@ -76,6 +83,39 @@ impl FromStr for WorldDimensions {
             ));
         }
         let world_height = world_height_r.unwrap();
+
+        if world_width < MIN_WIDTH {
+            return Err(WorldDimensionParseError::new(
+                WorldDimensionParseErrorCodes::NotWideEnough,
+                format!(
+                    "World must be a minimum of {} tiles wide to be playable.",
+                    MIN_WIDTH
+                )
+                .to_string(),
+            ));
+        }
+        if world_height < MIN_HEIGHT {
+            return Err(WorldDimensionParseError::new(
+                WorldDimensionParseErrorCodes::NotTallEnough,
+                format!(
+                    "World must be a minimum of {} tiles high to be playable.",
+                    MIN_HEIGHT
+                )
+                .to_string(),
+            ));
+        }
+        let area = world_height * world_height;
+        println!("{}", area);
+        if area < MIN_AREA {
+            return Err(WorldDimensionParseError::new(
+                WorldDimensionParseErrorCodes::NotBigEnough,
+                format!(
+                    "World must have area (w*h) greater than {} to be playable. ({} is {})",
+                    MIN_AREA, s, area
+                )
+                .to_string(),
+            ));
+        }
         Ok(WorldDimensions {
             world_width,
             world_height,
@@ -87,13 +127,13 @@ impl FromStr for WorldDimensions {
 
 #[test]
 fn test_w_d_from_str_valid() {
-    let res = "40x40".parse::<WorldDimensions>();
+    let res = "40x50".parse::<WorldDimensions>();
     assert_eq!(
         Ok(WorldDimensions {
             world_width: 40,
-            world_height: 40,
+            world_height: 50,
             display_width: 20,
-            display_height: 20
+            display_height: 25
         }),
         res
     );
@@ -115,12 +155,40 @@ fn test_w_d_from_str_bad_w() {
         assert_eq!(code, WorldDimensionParseErrorCodes::InvalidWidth);
     }
 }
+
 #[test]
 fn test_w_d_from_str_bad_h() {
     let res = "40xm".parse::<WorldDimensions>();
     assert!(res.is_err());
     if let Err(WorldDimensionParseError { code, .. }) = res {
         assert_eq!(code, WorldDimensionParseErrorCodes::InvalidHeight);
+    }
+}
+
+#[test]
+fn test_w_d_too_narrow() {
+    let res = "39x80".parse::<WorldDimensions>();
+    assert!(res.is_err());
+    if let Err(WorldDimensionParseError { code, .. }) = res {
+        assert_eq!(code, WorldDimensionParseErrorCodes::NotWideEnough);
+    }
+}
+
+#[test]
+fn test_w_d_too_short() {
+    let res = "80x39".parse::<WorldDimensions>();
+    assert!(res.is_err());
+    if let Err(WorldDimensionParseError { code, .. }) = res {
+        assert_eq!(code, WorldDimensionParseErrorCodes::NotTallEnough);
+    }
+}
+
+#[test]
+fn test_w_d_too_small() {
+    let res = "40x40".parse::<WorldDimensions>();
+    assert!(res.is_err());
+    if let Err(WorldDimensionParseError { code, .. }) = res {
+        assert_eq!(code, WorldDimensionParseErrorCodes::NotBigEnough);
     }
 }
 
