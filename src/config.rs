@@ -148,7 +148,7 @@ pub fn parse_command_line_args() -> Config {
             Arg::with_name("size")
                 .short("s")
                 .long("size")
-                .default_value("50x80")
+                .default_value("80x50")
                 .help("size of world expressed as WxH (example: 80x50 is 80 tiles wide by 80 tiles wide")
                 .value_name("architect"),
         )
