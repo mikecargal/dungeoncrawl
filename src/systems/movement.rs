@@ -27,7 +27,8 @@ pub fn movement(
                         camera.on_player_move(want_move.destination);
                         if let Some(vt) = &fov.visible_tiles.as_ref() {
                             vt.iter().for_each(|pos| {
-                                map.revealed_tiles[map_idx(pos.x, pos.y)] = true;
+                                map.revealed_tiles
+                                    [Map::index_for_x_y_width(pos.x, pos.y, map.width)] = true;
                             })
                         }
                     }

@@ -26,11 +26,11 @@ pub mod prelude {
     pub use legion::systems::CommandBuffer;
     pub use legion::world::SubWorld;
 
-    pub const SCREEN_WIDTH: i32 = 120;
-    pub const SCREEN_HEIGHT: i32 = 80;
-    pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
-    pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
-    pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
+    //   pub const SCREEN_WIDTH: i32 = 120;
+    //   pub const SCREEN_HEIGHT: i32 = 80;
+    // pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
+    //   pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
+    //   pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
     pub const GAME_TILE_WIDTH: i32 = 32;
     pub const GAME_TILE_HEIGHT: i32 = 32;
     pub const HUD_TILE_WIDTH: i32 = 8;
@@ -119,7 +119,16 @@ impl State {
             .iter()
             .for_each(|pos| spawn_monster(&mut ecs, &mut rng, *pos));
         resources.insert(map_builder.map);
-        resources.insert(Camera::new(map_builder.player_start.unwrap()));
+        let WorldDimensions {
+            display_width,
+            display_height,
+            ..
+        } = config.world_dimensions;
+        resources.insert(Camera::new(
+            map_builder.player_start.unwrap(),
+            display_width,
+            display_height,
+        ));
         resources.insert(TurnState::AwaitingInput);
         resources.insert(rng);
         resources.insert(map_builder.theme);
@@ -212,18 +221,23 @@ impl GameState for State {
 
 fn main() -> BError {
     let config = config::parse_command_line_args();
+    let WorldDimensions {
+        display_width,
+        display_height,
+        ..
+    } = config.world_dimensions;
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
-        .with_dimensions(DISPLAY_WIDTH, DISPLAY_HEIGHT)
+        .with_dimensions(display_width, display_height)
         .with_tile_dimensions(GAME_TILE_WIDTH, GAME_TILE_WIDTH)
         .with_resource_path("resources/")
         .with_font("dungeonfont.png", GAME_TILE_WIDTH, GAME_TILE_WIDTH)
         .with_font("terminal8x8.png", HUD_TILE_WIDTH, HUD_TILE_WIDTH)
-        .with_simple_console(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
-        .with_simple_console_no_bg(DISPLAY_WIDTH, DISPLAY_HEIGHT, "dungeonfont.png")
+        .with_simple_console(display_width, display_height, "dungeonfont.png")
+        .with_simple_console_no_bg(display_width, display_height, "dungeonfont.png")
         .with_simple_console_no_bg(
-            DISPLAY_WIDTH * (GAME_TILE_WIDTH / HUD_TILE_WIDTH),
-            DISPLAY_HEIGHT * (GAME_TILE_HEIGHT / HUD_TILE_HEIGHT),
+            display_width * (GAME_TILE_WIDTH / HUD_TILE_WIDTH),
+            display_height * (GAME_TILE_HEIGHT / HUD_TILE_HEIGHT),
             "terminal8x8.png",
         )
         .build()?;

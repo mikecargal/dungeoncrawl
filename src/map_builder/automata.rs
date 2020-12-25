@@ -2,18 +2,24 @@ use crate::prelude::*;
 
 use super::MapArchitect;
 
-pub struct CellularAutomataArchitect {}
+pub struct CellularAutomataArchitect {
+    width: i32,
+    height: i32,
+}
 
 impl MapArchitect for CellularAutomataArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         const ITERATION_COUNT: i32 = 10;
+
         let mut mb = MapBuilder {
-            map: Map::new(),
+            map: Map::new(self.width, self.height),
             rooms: vec![],
             monster_spawns: vec![],
             player_start: None,
             amulet_start: None,
             theme: None,
+            width: self.width,
+            height: self.height,
         };
         self.random_noise_map(rng, &mut mb.map);
         for _ in 0..=ITERATION_COUNT {
@@ -28,8 +34,8 @@ impl MapArchitect for CellularAutomataArchitect {
 }
 
 impl CellularAutomataArchitect {
-    pub fn new() -> Box<dyn MapArchitect> {
-        Box::new(Self {})
+    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        Box::new(Self { width, height })
     }
 
     fn random_noise_map(&mut self, rng: &mut RandomNumberGenerator, map: &mut Map) {
@@ -40,8 +46,9 @@ impl CellularAutomataArchitect {
             Point::new(idx % w, idx / w)
         };
 
+        let checker = map.in_floor_bounds_checker();
         map.tiles.iter_mut().enumerate().for_each(|(idx, t)| {
-            if !(Map::in_floor_bounds(idx_to_point(idx))) {
+            if !(checker(idx_to_point(idx))) {
                 *t = TileType::Wall;
                 return;
             }
@@ -58,7 +65,8 @@ impl CellularAutomataArchitect {
         (-1..=1)
             .cartesian_product(-1..=1)
             .filter(|(ix, iy)| {
-                !(*ix == 0 && *iy == 0) && map.tiles[map_idx(x + *ix, y + *iy)] == TileType::Wall
+                !(*ix == 0 && *iy == 0)
+                    && map.tiles[map.index_for(x + *ix, y + *iy)] == TileType::Wall
             })
             .count()
     }
@@ -68,12 +76,12 @@ impl CellularAutomataArchitect {
 
         let mut new_tiles = map.tiles.clone();
 
-        for (y, x) in (1..SCREEN_HEIGHT - 1).cartesian_product(1..SCREEN_WIDTH - 1) {
+        for (y, x) in (1..map.height - 1).cartesian_product(1..map.width - 1) {
             let neighbors = self.count_neighbors(x, y, map);
-            let idx = map_idx(x, y);
+            let idx = map.index_for(x, y);
             if neighbors > MAX_NEIGHBORS || //.
                   neighbors == 0 || //.
-                     !Map::in_floor_bounds(Point::new(x, y))
+                     !map.in_floor_bounds(Point::new(x, y))
             {
                 new_tiles[idx] = TileType::Wall
             } else {
@@ -84,7 +92,7 @@ impl CellularAutomataArchitect {
     }
 
     fn find_start(&self, map: &Map) -> Point {
-        let center = Point::new(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
+        let center = Point::new(map.width / 2, map.height / 2);
         let closest_point = map
             .tiles
             .iter()

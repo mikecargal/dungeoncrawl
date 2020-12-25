@@ -14,7 +14,7 @@ use rooms::RoomsArchitect;
 use std::cmp::{max, min};
 pub use themes::*;
 
-const NUM_ROOMS: usize = (SCREEN_WIDTH * SCREEN_HEIGHT / 100) as usize; //20;
+const TILES_TO_ROOM_RATIO: usize = 100;
 
 const UNREACHABLE: f32 = std::f32::MAX;
 
@@ -23,6 +23,8 @@ pub trait MapArchitect {
 }
 
 pub struct MapBuilder {
+    pub width: i32,
+    pub height: i32,
     pub map: Map,
     pub rooms: Vec<Rect>,
     pub monster_spawns: Vec<Point>,
@@ -35,21 +37,21 @@ const ROOMS_CREATOR_IDX: usize = 0;
 const DRUNKARDS_WALK_CREATOR_IDX: usize = ROOMS_CREATOR_IDX + 1;
 const CELLULAR_AUTOMATA_CREATOR_IDX: usize = DRUNKARDS_WALK_CREATOR_IDX + 1;
 lazy_static! {
-    static ref ARCHICTECT_CREATORS: Vec<fn() -> Box<dyn MapArchitect>> = vec![
-        || {
+    static ref ARCHICTECT_CREATORS: Vec<fn(width: i32, height: i32) -> Box<dyn MapArchitect>> = vec![
+        |w, h| {
             #[cfg(debug_assertions)]
             println!("Rooms Architect");
-            RoomsArchitect::new()
+            RoomsArchitect::new(w, h)
         },
-        || {
+        |w, h| {
             #[cfg(debug_assertions)]
             println!("DrunkardsWalk Architect");
-            DrunkardsWalkArchitect::new()
+            DrunkardsWalkArchitect::new(w, h)
         },
-        || {
+        |w, h| {
             #[cfg(debug_assertions)]
             println!("Cellular Automata Architect");
-            CellularAutomataArchitect::new()
+            CellularAutomataArchitect::new(w, h)
         },
     ];
 }
@@ -59,20 +61,38 @@ lazy_static! {
         vec![|| DungeonTheme::new(), || ForestTheme::new(),];
 }
 
+fn get_random_architect(
+    creators: &Vec<fn(width: i32, height: i32) -> Box<dyn MapArchitect>>,
+    width: i32,
+    height: i32,
+    rng: &mut RandomNumberGenerator,
+) -> Box<dyn MapArchitect> {
+    creators[rng.range(0, creators.len())](width, height)
+}
+
 fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator) -> T {
     creators[rng.range(0, creators.len())]()
 }
 
 impl MapBuilder {
     pub fn build(config: &Config, rng: &mut RandomNumberGenerator) -> Self {
+        let WorldDimensions {
+            world_width: width,
+            world_height: height,
+            ..
+        } = config.world_dimensions;
         let mut mb = match config.architect {
-            ArchitectChoice::Random => get_random_from(&ARCHICTECT_CREATORS, rng).build(rng),
-            ArchitectChoice::Rooms => ARCHICTECT_CREATORS[ROOMS_CREATOR_IDX]().build(rng),
+            ArchitectChoice::Random => {
+                get_random_architect(&ARCHICTECT_CREATORS, width, height, rng).build(rng)
+            }
+            ArchitectChoice::Rooms => {
+                ARCHICTECT_CREATORS[ROOMS_CREATOR_IDX](width, height).build(rng)
+            }
             ArchitectChoice::CellularAutomata => {
-                ARCHICTECT_CREATORS[CELLULAR_AUTOMATA_CREATOR_IDX]().build(rng)
+                ARCHICTECT_CREATORS[CELLULAR_AUTOMATA_CREATOR_IDX](width, height).build(rng)
             }
             ArchitectChoice::Drunkard => {
-                ARCHICTECT_CREATORS[DRUNKARDS_WALK_CREATOR_IDX]().build(rng)
+                ARCHICTECT_CREATORS[DRUNKARDS_WALK_CREATOR_IDX](width, height).build(rng)
             }
         };
         apply_prefab(&mut mb, rng);
@@ -102,8 +122,8 @@ impl MapBuilder {
 
     fn find_most_distant(&self) -> Point {
         let dijkstra_map = DijkstraMap::new(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
+            self.width,
+            self.height,
             &vec![self.map.point2d_to_index(
                 self.player_start
                     .expect("Can't find distance from non-existent player"),
@@ -127,15 +147,16 @@ impl MapBuilder {
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
         const ROOM_MIN_DIMENSION: i32 = 2;
         const ROOM_MAX_WIDTH: i32 = 10;
-        const ROOM_MAX_HEIGHT: i32 = SCREEN_WIDTH * ROOM_MAX_WIDTH / SCREEN_HEIGHT;
+        let room_max_height: i32 = self.width * ROOM_MAX_WIDTH / self.height;
         const MAX_ATTEMPTS: i32 = 1_000;
         let mut attempts = 0;
-        while self.rooms.len() < NUM_ROOMS && attempts < MAX_ATTEMPTS {
+        let num_rooms = (self.width * self.height) as usize / TILES_TO_ROOM_RATIO;
+        while self.rooms.len() < num_rooms && attempts < MAX_ATTEMPTS {
             let room = Rect::with_size(
-                rng.range(1, SCREEN_WIDTH - ROOM_MAX_WIDTH),
-                rng.range(1, SCREEN_HEIGHT - ROOM_MAX_HEIGHT),
+                rng.range(1, self.width - ROOM_MAX_WIDTH),
+                rng.range(1, self.height - room_max_height),
                 rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_WIDTH + 1),
-                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_HEIGHT + 1),
+                rng.range(ROOM_MIN_DIMENSION, room_max_height + 1),
             );
             let mut overlap = false;
             for r in self.rooms.iter() {
@@ -145,10 +166,10 @@ impl MapBuilder {
             }
             if !overlap {
                 room.for_each(|p| {
-                    if p.x > 0 && p.x < SCREEN_WIDTH //.
-                        && p.y > 0 && p.y < SCREEN_HEIGHT
+                    if p.x > 0 && p.x < self.width //.
+                        && p.y > 0 && p.y < self.height
                     {
-                        let idx = map_idx(p.x, p.y);
+                        let idx = self.map.index_for(p.x, p.y);
                         self.map.tiles[idx] = TileType::Floor;
                     }
                 });
@@ -198,7 +219,7 @@ impl MapBuilder {
     }
 
     fn spawn_monsters(&self, start: &Point, rng: &mut RandomNumberGenerator) -> Vec<Point> {
-        const NUM_MONSTERS: usize = (SCREEN_HEIGHT * SCREEN_HEIGHT / 40) as usize;
+        let num_monsters = (self.width * self.height / 40) as usize;
         const MIN_MONSTER_DISTANCE: f32 = 10.0;
         let mut spawnable_tiles: Vec<Point> = self
             .map
@@ -214,7 +235,7 @@ impl MapBuilder {
             .collect();
 
         let mut spawns = Vec::new();
-        for _ in 0..NUM_MONSTERS {
+        for _ in 0..num_monsters {
             let target_index = rng.random_slice_index(&spawnable_tiles).unwrap();
             spawns.push(spawnable_tiles[target_index.clone()]);
             spawnable_tiles.remove(target_index);
@@ -238,7 +259,7 @@ pub fn display(
     const MONSTER: char = 'M';
 
     use colored::*;
-    let mut output = vec!['.'; NUM_TILES];
+    let mut output = vec!['.'; (map.width * map.height) as usize];
 
     map.tiles.iter().enumerate().for_each(|(idx, t)| match *t {
         TileType::Floor => output[idx] = FLOOR,
@@ -255,9 +276,9 @@ pub fn display(
         "----------------------\n{}\n----------------------",
         title.bright_yellow()
     );
-    for y in 0..SCREEN_HEIGHT {
-        for x in 0..SCREEN_WIDTH {
-            match output[map_idx(x, y)] {
+    for y in 0..map.height {
+        for x in 0..map.width {
+            match output[map.index_for(x, y)] {
                 WALL => print!("{}", WALL.to_string().bright_green()),
                 PLAYER => print!("{}", PLAYER.to_string().bright_yellow()),
                 MONSTER => print!("{}", MONSTER.to_string().bright_red()),

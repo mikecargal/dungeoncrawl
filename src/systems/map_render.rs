@@ -18,7 +18,7 @@ pub fn map_render(
         let pt = Point::new(x, y);
         let offset = Point::new(camera.left_x, camera.top_y);
         let visible_to_player = player_fov.is_visible(&pt);
-        let idx = map_idx(x, y);
+        let idx = map.index_for(x, y);
         if map.in_bounds(pt) && (visible_to_player | map.revealed_tiles[idx]) {
             let tint = if player_fov.is_visible(&pt) {
                 WHITE

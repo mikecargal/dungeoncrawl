@@ -5,22 +5,26 @@ pub struct Camera {
     pub right_x: i32,
     pub top_y: i32,
     pub bottom_y: i32,
+    pub width: i32,
+    pub height: i32,
 }
 
 impl Camera {
-    pub fn new(player_position: Point) -> Self {
+    pub fn new(player_position: Point, width: i32, height: i32) -> Self {
         Self {
-            left_x: player_position.x - DISPLAY_WIDTH / 2,
-            right_x: player_position.x + DISPLAY_WIDTH / 2,
-            top_y: player_position.y - DISPLAY_WIDTH / 2,
-            bottom_y: player_position.y + DISPLAY_WIDTH / 2,
+            left_x: player_position.x - width / 2,
+            right_x: player_position.x + width / 2,
+            top_y: player_position.y - height / 2,
+            bottom_y: player_position.y + height / 2,
+            width,
+            height,
         }
     }
 
     pub fn on_player_move(&mut self, player_position: Point) {
-        self.left_x = player_position.x - DISPLAY_WIDTH / 2;
-        self.right_x = player_position.x + DISPLAY_WIDTH / 2;
-        self.top_y = player_position.y - DISPLAY_WIDTH / 2;
-        self.bottom_y = player_position.y + DISPLAY_WIDTH / 2;
+        self.left_x = player_position.x - self.width / 2;
+        self.right_x = player_position.x + self.width / 2;
+        self.top_y = player_position.y - self.height / 2;
+        self.bottom_y = player_position.y + self.height / 2;
     }
 }

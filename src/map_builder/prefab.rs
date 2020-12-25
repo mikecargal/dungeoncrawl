@@ -55,8 +55,8 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         .filter(|pt| {
             pt.x > 0
                 && pt.y > 0
-                && pt.x + FORTRESS.x < SCREEN_WIDTH
-                && pt.y + FORTRESS.y < SCREEN_HEIGHT
+                && pt.x + FORTRESS.x < mb.map.width
+                && pt.y + FORTRESS.y < mb.map.height
         })
         .collect::<Vec<Point>>();
     if valid_positions_around_amulet.len() == 0 {
@@ -75,7 +75,7 @@ pub fn apply_prefab(mb: &mut MapBuilder, rng: &mut RandomNumberGenerator) {
         .cartesian_product(placement.x..placement.x + FORTRESS.x)
         .enumerate()
     {
-        let idx = map_idx(tx, ty);
+        let idx = mb.map.index_for(tx, ty);
         match fortress_vec[i] {
             POSSIBLER_AMULET_POS if mb.map.index_to_point2d(idx) == mb.amulet_start.unwrap() => (),
             POSSIBLER_AMULET_POS | OUTSIDE_FLOOR => mb.map.tiles[idx] = TileType::Floor,

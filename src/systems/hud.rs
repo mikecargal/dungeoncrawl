@@ -3,17 +3,17 @@ use crate::prelude::*;
 #[system]
 #[read_component(Health)]
 #[read_component(Player)]
-pub fn hud(ecs: &SubWorld) {
+pub fn hud(ecs: &SubWorld, #[resource] map: &Map) {
     let mut health_query = <&Health>::query().filter(component::<Player>());
     let player_health = health_query.iter(ecs).nth(0).unwrap();
 
     let mut draw_batch = DrawBatch::new();
     draw_batch.target(HUD_LAYER.id);
     draw_batch.print_centered(0, "Explore the Dungeon.  Cursor keys to move.");
-    let health_x = (SCREEN_HEIGHT - 1) * 2;
+    let health_x = (map.height - 1) * 2;
     draw_batch.bar_horizontal(
         Point::new(0, health_x),
-        SCREEN_WIDTH * 2,
+        map.width * 2,
         player_health.current,
         player_health.max,
         ColorPair::new(RED, BLACK),

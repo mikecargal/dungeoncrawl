@@ -22,6 +22,12 @@ pub struct WorldDimensions {
     pub display_height: i32,
 }
 
+impl WorldDimensions {
+    pub fn num_tiles(&self) -> usize {
+        (self.world_width * self.world_width) as usize
+    }
+}
+
 #[derive(Debug, PartialEq)]
 enum WorldDimensionParseErrorCodes {
     BadFormat,

@@ -14,12 +14,12 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
     let mut positions = <(Entity, &Point, &Health)>::query();
 
     let player_pos = <(&Point, &Player)>::query().iter(ecs).nth(0).unwrap().0;
-    let player_idx = map_idx(player_pos.x, player_pos.y);
+    let player_idx = map.index_for(player_pos.x, player_pos.y);
 
     let search_targets = vec![player_idx];
     let dijkstra_map = DijkstraMap::new(
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
+        map.width,
+        map.height,
         &search_targets,
         map,
         DISTANCE_MAX_DEPTH,
@@ -30,7 +30,7 @@ pub fn chasing(#[resource] map: &Map, ecs: &SubWorld, commands: &mut CommandBuff
         .iter(ecs)
         .filter(|(_, _, _, fov)| fov.is_visible(&player_pos))
         .for_each(|(entity, pos, _, _)| {
-            let idx = map_idx(pos.x, pos.y);
+            let idx = map.index_for(pos.x, pos.y);
             if let Some(destination) = DijkstraMap::find_lowest_exit(&dijkstra_map, idx, map) {
                 let distance = DistanceAlg::Pythagoras.distance2d(*pos, *player_pos);
                 let destination = if distance > 1.2 {

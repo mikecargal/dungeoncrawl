@@ -1,16 +1,21 @@
 use super::MapArchitect;
 use crate::prelude::*;
-pub struct RoomsArchitect {}
+pub struct RoomsArchitect {
+    width: i32,
+    height: i32,
+}
 
 impl MapArchitect for RoomsArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         let mut mb = MapBuilder {
-            map: Map::new(),
+            map: Map::new(self.width, self.height),
             rooms: Vec::new(),
             monster_spawns: Vec::new(),
             player_start: None,
             amulet_start: None,
             theme: None,
+            width: self.width,
+            height: self.height,
         };
 
         mb.fill(TileType::Wall);
@@ -26,7 +31,7 @@ impl MapArchitect for RoomsArchitect {
 }
 
 impl RoomsArchitect {
-    pub fn new() -> Box<dyn MapArchitect> {
-        Box::new(Self {})
+    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        Box::new(Self { width, height })
     }
 }

@@ -1,51 +1,74 @@
 use crate::prelude::*;
 
-const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
-
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
     Wall,
     Floor,
 }
 
-pub fn map_idx(x: i32, y: i32) -> usize {
-    ((y * SCREEN_WIDTH) + x) as usize
+pub fn map_idx(x: i32, y: i32, width: i32) -> usize {
+    ((y * width) + x) as usize
 }
 
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub revealed_tiles: Vec<bool>,
+    pub width: i32,
+    pub height: i32,
 }
 
 impl Map {
-    pub fn new() -> Self {
+    pub fn new(width: i32, height: i32) -> Self {
+        let num_tiles = (width * height) as usize;
         Self {
-            tiles: vec![TileType::Floor; NUM_TILES],
-            revealed_tiles: vec![false; NUM_TILES],
+            tiles: vec![TileType::Floor; num_tiles],
+            revealed_tiles: vec![false; num_tiles],
+            width,
+            height,
         }
     }
 
-    pub fn in_floor_bounds(point: Point) -> bool {
-        point.x >= 1 && //.
-            point.x < SCREEN_WIDTH-1 && //.
-            point.y >= 1 && //.
-            point.y < SCREEN_HEIGHT-1
+    pub fn index_for_x_y_width(x: i32, y: i32, width: i32) -> usize {
+        ((y * width) + x) as usize
     }
 
-    pub fn in_bounds(point: Point) -> bool {
+    pub fn index_for(&self, x: i32, y: i32) -> usize {
+        ((y * self.width) + x) as usize
+    }
+
+    pub fn in_floor_bounds_checker(&self) -> impl Fn(Point) -> bool {
+        let width = self.width.clone();
+        let height = self.height.clone();
+        move |point: Point| {
+            point.x >= 1 && //.
+            point.x < width-1 && //.
+            point.y >= 1 && //.
+            point.y < height-1
+        }
+    }
+
+    pub fn in_floor_bounds(&self, point: Point) -> bool {
+        point.x >= 1 && //.
+            point.x < self.width-1 && //.
+            point.y >= 1 && //.
+            point.y < self.height-1
+    }
+
+    pub fn in_bounds(&self, point: Point) -> bool {
         point.x >= 0 && //.
-            point.x < SCREEN_WIDTH && //.
+            point.x < self.width && //.
             point.y >= 0 && //.
-            point.y < SCREEN_HEIGHT
+            point.y < self.height
     }
 
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        self.in_bounds(point) && self.tiles[map_idx(point.x, point.y)] == TileType::Floor
+        self.in_bounds(point)
+            && self.tiles[map_idx(point.x, point.y, self.width)] == TileType::Floor
     }
 
     pub fn try_idx(&self, point: Point) -> Option<usize> {
         if self.in_bounds(point) {
-            Some(map_idx(point.x, point.y))
+            Some(map_idx(point.x, point.y, self.width))
         } else {
             None
         }
@@ -66,8 +89,8 @@ impl Map {
 
     pub fn distance(&self, pt_a: Point, pt_b: Point) -> f32 {
         let dijkstra_map = DijkstraMap::new(
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
+            self.width,
+            self.height,
             &vec![self.point2d_to_index(pt_a)],
             self,
             DISTANCE_MAX_DEPTH,
@@ -123,6 +146,6 @@ impl BaseMap for Map {
 
 impl Algorithm2D for Map {
     fn dimensions(&self) -> Point {
-        Point::new(SCREEN_WIDTH, SCREEN_HEIGHT)
+        Point::new(self.width, self.height)
     }
 }
