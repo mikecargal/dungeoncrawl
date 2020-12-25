@@ -14,6 +14,13 @@ pub struct ArchitectChoiceParseError {
     msg: String,
 }
 
+#[derive(Debug)]
+pub enum ThemeChoice {
+    Dungeon,
+    Forest,
+    Random,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct WorldDimensions {
     pub world_width: i32,
@@ -51,7 +58,7 @@ impl WorldDimensionParseError {
 
 impl fmt::Display for WorldDimensionParseError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "WorldDimensionParseError: ({})", self.msg) // TODO: actual error details
+        write!(f, "WorldDimensionParseError: ({})", self.msg)
     }
 }
 
@@ -195,6 +202,7 @@ fn test_w_d_too_small() {
 #[derive(Debug)]
 pub struct Config {
     pub architect: ArchitectChoice,
+    pub theme: ThemeChoice,
     pub world_dimensions: WorldDimensions,
 }
 
@@ -211,6 +219,13 @@ pub fn parse_command_line_args() -> Config {
                 .default_value("Random")
                 .possible_values(&["Rooms", "Drunkard", "CellularAutomata", "Random"])
                 .value_name("architect"),
+        )        .arg(
+            Arg::with_name("theme")
+                .short("t")
+                .long("theme")
+                .default_value("Random")
+                .possible_values(&["Dungeon", "Forest", "Random"])
+                .value_name("theme"),
         )
         .arg(
             Arg::with_name("size")
@@ -230,6 +245,13 @@ pub fn parse_command_line_args() -> Config {
         "CellularAutomata" => ArchitectChoice::CellularAutomata,
         val => panic!(format!("{:?} is not a valid Architect choice.", val)),
     };
+    let th = matches.value_of("theme");
+    let theme = match th.unwrap() {
+        "Random" => ThemeChoice::Random,
+        "Dungeon" => ThemeChoice::Dungeon,
+        "Forest" => ThemeChoice::Forest,
+        val => panic!(format!("{:?} is not a valid Theme choice.", val)),
+    };
     let world_dimensions: WorldDimensions = matches
         .value_of("size")
         .unwrap()
@@ -238,6 +260,7 @@ pub fn parse_command_line_args() -> Config {
     let config = Config {
         architect,
         world_dimensions,
+        theme,
     };
     println!("Config = {:?}", config);
     config

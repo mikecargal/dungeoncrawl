@@ -56,6 +56,8 @@ lazy_static! {
     ];
 }
 
+const DUNGEON_THEME_CREATOR_IDX: usize = 0;
+const FOREST_THEME_CREATOR_IDX: usize = DUNGEON_THEME_CREATOR_IDX + 1;
 lazy_static! {
     static ref THEME_CREATORS: Vec<fn() -> Box<dyn MapTheme>> =
         vec![|| DungeonTheme::new(), || ForestTheme::new(),];
@@ -96,7 +98,11 @@ impl MapBuilder {
             }
         };
         apply_prefab(&mut mb, rng);
-        mb.theme = Some(get_random_from(&THEME_CREATORS, rng));
+        mb.theme = Some(match config.theme {
+            ThemeChoice::Dungeon => THEME_CREATORS[DUNGEON_THEME_CREATOR_IDX](),
+            ThemeChoice::Forest => THEME_CREATORS[FOREST_THEME_CREATOR_IDX](),
+            ThemeChoice::Random => get_random_from(&THEME_CREATORS, rng),
+        });
         #[cfg(debug_assertions)]
         {
             display(
