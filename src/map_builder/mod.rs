@@ -11,10 +11,14 @@ use automata::CellularAutomataArchitect;
 use drunkard::DrunkardsWalkArchitect;
 use prefab::apply_prefab;
 use rooms::RoomsArchitect;
-use std::cmp::{max, min};
+use std::{
+    cmp::{max, min, Ordering},
+    collections::HashMap,
+};
 pub use themes::*;
 
-const TILES_TO_ROOM_RATIO: usize = 100;
+const TILES_TO_ROOM_RATIO: usize = 200;
+const MIN_ROOMS: usize = 10;
 
 const UNREACHABLE: f32 = std::f32::MAX;
 
@@ -108,9 +112,11 @@ impl MapBuilder {
             display(
                 "Map ",
                 &mb.map,
-                &mb.player_start.unwrap(),
-                &mb.amulet_start.unwrap(),
+                &mb.player_start,
+                &mb.amulet_start,
                 &mb.monster_spawns,
+                &None,
+                &None,
             );
             println!("Amulet is at {:?}", mb.amulet_start);
             println!(
@@ -152,30 +158,37 @@ impl MapBuilder {
 
     fn build_random_rooms(&mut self, rng: &mut RandomNumberGenerator) {
         const ROOM_MIN_DIMENSION: i32 = 2;
-        const ROOM_MAX_WIDTH: i32 = 10;
-        let room_max_height: i32 = self.width * ROOM_MAX_WIDTH / self.height;
+        let room_max_width: i32 = (self.width / 5).min(10);
+        let room_max_height: i32 = (self.height / 5).min(10);
         const MAX_ATTEMPTS: i32 = 1_000;
         let mut attempts = 0;
-        let num_rooms = (self.width * self.height) as usize / TILES_TO_ROOM_RATIO;
+        let num_rooms = (self.width * self.height) as usize
+            / rng
+                .range(TILES_TO_ROOM_RATIO, TILES_TO_ROOM_RATIO * 2)
+                .min(MIN_ROOMS);
+        println!(
+            "attempting {} rooms max=({}x{})",
+            num_rooms, room_max_width, room_max_height
+        );
         while self.rooms.len() < num_rooms && attempts < MAX_ATTEMPTS {
             let room = Rect::with_size(
-                rng.range(1, self.width - ROOM_MAX_WIDTH),
+                rng.range(1, self.width - room_max_width),
                 rng.range(1, self.height - room_max_height),
-                rng.range(ROOM_MIN_DIMENSION, ROOM_MAX_WIDTH + 1),
+                rng.range(ROOM_MIN_DIMENSION, room_max_width + 1),
                 rng.range(ROOM_MIN_DIMENSION, room_max_height + 1),
             );
-            let mut overlap = false;
-            for r in self.rooms.iter() {
-                if r.intersect(&room) {
-                    overlap = true;
-                }
-            }
-            if !overlap {
+
+            let valid_placement = self.map.in_floor_bounds(Point::new(room.x1, room.y1))
+                && self.map.in_floor_bounds(Point::new(room.x2, room.y2))
+                && !self.rooms.iter().any(|r| r.intersect(&room));
+
+            if valid_placement {
+                assert!(room.y2 < self.height);
                 room.for_each(|p| {
                     if p.x > 0 && p.x < self.width //.
                         && p.y > 0 && p.y < self.height
                     {
-                        let idx = self.map.index_for(p.x, p.y);
+                        let idx = self.map.point2d_to_index(p);
                         self.map.tiles[idx] = TileType::Floor;
                     }
                 });
@@ -183,6 +196,7 @@ impl MapBuilder {
             }
             attempts += 1;
         }
+        println!("actual rooms = {}", self.rooms.len());
     }
 
     fn apply_vertical_tunnel(&mut self, y1: i32, y2: i32, x: i32) {
@@ -210,16 +224,80 @@ impl MapBuilder {
             let bv = bc.x + bc.y;
             av.cmp(&bv)
         });
-        for (i, room) in rooms.iter().enumerate().skip(1) {
-            let prev = rooms[i - 1].center();
-            let new = room.center();
+        #[cfg(debug_assertions)]
+        {
+            println!("Start");
+            display(
+                "Map ",
+                &self.map,
+                &Some(rooms.first().unwrap().center()),
+                &None,
+                &[],
+                &None,
+                &None,
+            );
+        }
+
+        let mut map_idx_to_room: HashMap<usize, &Rect> = HashMap::new();
+        rooms.iter().for_each(|room| {
+            let Point { x, y } = room.center();
+            map_idx_to_room.insert(self.map.index_for(x, y), room);
+        });
+
+        loop {
+            let dijkstra_map = DijkstraMap::new(
+                self.width,
+                self.height,
+                &vec![self.map.point2d_to_index(rooms.first().unwrap().center())],
+                &self.map,
+                DISTANCE_MAX_DEPTH,
+            );
+
+            let (reachable_rooms, unreachable_rooms): (Vec<&Rect>, Vec<&Rect>) = dijkstra_map
+                .map
+                .iter()
+                .enumerate()
+                .map(|(idx, distance)| (distance, map_idx_to_room.get(&idx)))
+                .filter(|(_, room)| room.is_some())
+                .partition_map(|(distance, room)| {
+                    if *distance != UNREACHABLE {
+                        Either::Left(*room.unwrap())
+                    } else {
+                        Either::Right(*room.unwrap())
+                    }
+                });
+
+            if unreachable_rooms.is_empty() {
+                break;
+            }
+            let shortest_tunnel = reachable_rooms
+                .iter()
+                .cartesian_product(unreachable_rooms.iter())
+                .map(|(room1, room2)| tunnel_between(room1, room2))
+                .min()
+                .unwrap();
+
+            let Tunnel { start, end, .. } = shortest_tunnel;
 
             if fifty_fifty(rng) {
-                self.apply_horizontal_tunnel(prev.x, new.x, prev.y);
-                self.apply_vertical_tunnel(prev.y, new.y, new.x);
+                self.apply_horizontal_tunnel(start.x, end.x, start.y);
+                self.apply_vertical_tunnel(start.y, end.y, end.x);
             } else {
-                self.apply_vertical_tunnel(prev.y, new.y, prev.x);
-                self.apply_horizontal_tunnel(prev.x, new.x, new.y);
+                self.apply_vertical_tunnel(start.y, end.y, start.x);
+                self.apply_horizontal_tunnel(start.x, end.x, end.y);
+            }
+            #[cfg(debug_assertions)]
+            {
+                println!("tunnel from {:?} to {:?}", start, end);
+                display(
+                    "Map ",
+                    &self.map,
+                    &None,
+                    &None,
+                    &[],
+                    &Some(start),
+                    &Some(end),
+                );
             }
         }
     }
@@ -250,12 +328,67 @@ impl MapBuilder {
     }
 }
 
+#[derive(Debug, Eq)]
+struct Tunnel {
+    pub start: Point,
+    pub end: Point,
+    pub length: i32,
+}
+
+impl Ord for Tunnel {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.length.cmp(&other.length)
+    }
+}
+
+impl PartialOrd for Tunnel {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl PartialEq for Tunnel {
+    fn eq(&self, other: &Self) -> bool {
+        self.length == other.length
+    }
+}
+
+fn tunnel_between(room1: &Rect, room2: &Rect) -> Tunnel {
+    assert!(!room1.intersect(room2));
+    let (r1x, r2x) = match (room1, room2) {
+        (Rect { x2, .. }, Rect { x1, .. }) if x2 < x1 => (*x2, *x1),
+        (Rect { x1, .. }, Rect { x2, .. }) if x1 > x2 => (*x1, *x2),
+        (r1, r2) => {
+            let (overlap_x1, overlap_x2) = (r1.x1.max(r2.x1), r1.x2.min(r2.x2));
+            let median = overlap_x1 + (overlap_x2 - overlap_x1) / 2;
+            (median, median)
+        }
+    };
+    let (r1y, r2y) = match (room1, room2) {
+        (Rect { y2, .. }, Rect { y1, .. }) if y2 < y1 => (*y2, *y1),
+        (Rect { y1, .. }, Rect { y2, .. }) if y1 > y2 => (*y1, *y2),
+        (r1, r2) => {
+            let (overlap_y1, overlap_y2) = (r1.y1.max(r2.y1), r1.y2.min(r2.y2));
+            let median = overlap_y1 + (overlap_y2 - overlap_y1) / 2;
+            (median, median)
+        }
+    };
+    let tunnel_distance = (r1x - r2x).abs() + (r1y - r2y).abs();
+    Tunnel {
+        start: Point::new(r1x, r1y),
+        end: Point::new(r2x, r2y),
+        length: tunnel_distance,
+    }
+}
+
 pub fn display(
     title: &str,
     map: &Map,
-    player_start: &Point,
-    amulet_start: &Point,
+    player_start: &Option<Point>,
+    amulet_start: &Option<Point>,
     monster_spawns: &[Point],
+    start: &Option<Point>,
+    end: &Option<Point>,
 ) {
     //----- Display Chars
     const FLOOR: char = '.';
@@ -263,6 +396,8 @@ pub fn display(
     const PLAYER: char = '@';
     const AMULET: char = 'A';
     const MONSTER: char = 'M';
+    const START: char = 'S';
+    const END: char = 'E';
 
     use colored::*;
     let mut output = vec!['.'; (map.width * map.height) as usize];
@@ -272,8 +407,18 @@ pub fn display(
         TileType::Wall => output[idx] = WALL,
     });
 
-    output[map.point2d_to_index(*player_start)] = PLAYER;
-    output[map.point2d_to_index(*amulet_start)] = AMULET;
+    if let Some(pos) = player_start {
+        output[map.point2d_to_index(*pos)] = PLAYER;
+    }
+    if let Some(pos) = amulet_start {
+        output[map.point2d_to_index(*pos)] = AMULET;
+    }
+    if let Some(pos) = start {
+        output[map.point2d_to_index(*pos)] = START;
+    }
+    if let Some(pos) = end {
+        output[map.point2d_to_index(*pos)] = END;
+    }
     monster_spawns.iter().for_each(|p| {
         output[map.point2d_to_index(*p)] = MONSTER;
     });
@@ -289,6 +434,8 @@ pub fn display(
                 PLAYER => print!("{}", PLAYER.to_string().bright_yellow()),
                 MONSTER => print!("{}", MONSTER.to_string().bright_red()),
                 AMULET => print!("{}", AMULET.to_string().bright_magenta()),
+                START => print!("{}", START.to_string().bright_yellow()),
+                END => print!("{}", END.to_string().bright_yellow()),
                 _ => print!("{}", ".".truecolor(64, 64, 64)),
             }
         }

@@ -6,10 +6,6 @@ pub enum TileType {
     Floor,
 }
 
-pub fn map_idx(x: i32, y: i32, width: i32) -> usize {
-    ((y * width) + x) as usize
-}
-
 pub struct Map {
     pub tiles: Vec<TileType>,
     pub revealed_tiles: Vec<bool>,
@@ -62,13 +58,12 @@ impl Map {
     }
 
     pub fn can_enter_tile(&self, point: Point) -> bool {
-        self.in_bounds(point)
-            && self.tiles[map_idx(point.x, point.y, self.width)] == TileType::Floor
+        self.in_bounds(point) && self.tiles[self.index_for(point.x, point.y)] == TileType::Floor
     }
 
     pub fn try_idx(&self, point: Point) -> Option<usize> {
         if self.in_bounds(point) {
-            Some(map_idx(point.x, point.y, self.width))
+            Some(self.index_for(point.x, point.y))
         } else {
             None
         }
