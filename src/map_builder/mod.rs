@@ -172,15 +172,13 @@ impl MapBuilder {
         );
         while self.rooms.len() < num_rooms && attempts < MAX_ATTEMPTS {
             let room = Rect::with_size(
-                rng.range(1, self.width - room_max_width),
-                rng.range(1, self.height - room_max_height),
+                rng.range(1, (self.width - 1) - room_max_width),
+                rng.range(1, (self.height - 1) - room_max_height),
                 rng.range(ROOM_MIN_DIMENSION, room_max_width + 1),
                 rng.range(ROOM_MIN_DIMENSION, room_max_height + 1),
             );
 
-            let valid_placement = self.map.in_floor_bounds(Point::new(room.x1, room.y1))
-                && self.map.in_floor_bounds(Point::new(room.x2, room.y2))
-                && !self.rooms.iter().any(|r| r.intersect(&room));
+            let valid_placement = !self.rooms.iter().any(|r| r.intersect(&room));
 
             if valid_placement {
                 assert!(room.y2 < self.height);
