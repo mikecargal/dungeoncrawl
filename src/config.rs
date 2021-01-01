@@ -51,8 +51,11 @@ pub struct WorldDimensionParseError {
 }
 
 impl WorldDimensionParseError {
-    fn new(code: WorldDimensionParseErrorCodes, msg: String) -> Self {
-        Self { code, msg }
+    fn new(code: WorldDimensionParseErrorCodes, msg: &str) -> Self {
+        Self {
+            code,
+            msg: String::from(msg),
+        }
     }
 }
 
@@ -72,13 +75,13 @@ impl FromStr for WorldDimensions {
 
         let wh: Vec<&str> = s.split('x').collect();
         if wh.len() != 2 {
-            return Err(WorldDimensionParseError::new(WorldDimensionParseErrorCodes::BadFormat, "World Dimensions should we expressed as WxH where W and H are the width and height.".to_string() ));
+            return Err(WorldDimensionParseError::new(WorldDimensionParseErrorCodes::BadFormat, "World Dimensions should we expressed as WxH where W and H are the width and height." ));
         }
         let world_width_r = wh[0].parse::<i32>();
         if world_width_r.is_err() {
             return Err(WorldDimensionParseError::new(
                 WorldDimensionParseErrorCodes::InvalidWidth,
-                "World Dimensions width is invalid".to_string(),
+                "World Dimensions width is invalid",
             ));
         }
         let world_width = world_width_r.unwrap();
@@ -86,7 +89,7 @@ impl FromStr for WorldDimensions {
         if world_height_r.is_err() {
             return Err(WorldDimensionParseError::new(
                 WorldDimensionParseErrorCodes::InvalidHeight,
-                "World Dimensions height is invalid".to_string(),
+                "World Dimensions height is invalid",
             ));
         }
         let world_height = world_height_r.unwrap();
@@ -94,21 +97,19 @@ impl FromStr for WorldDimensions {
         if world_width < MIN_WIDTH {
             return Err(WorldDimensionParseError::new(
                 WorldDimensionParseErrorCodes::NotWideEnough,
-                format!(
+                &format!(
                     "World must be a minimum of {} tiles wide to be playable.",
                     MIN_WIDTH
-                )
-                .to_string(),
+                ),
             ));
         }
         if world_height < MIN_HEIGHT {
             return Err(WorldDimensionParseError::new(
                 WorldDimensionParseErrorCodes::NotTallEnough,
-                format!(
+                &format!(
                     "World must be a minimum of {} tiles high to be playable.",
                     MIN_HEIGHT
-                )
-                .to_string(),
+                ),
             ));
         }
         let area = world_height * world_height;
@@ -116,11 +117,10 @@ impl FromStr for WorldDimensions {
         if area < MIN_AREA {
             return Err(WorldDimensionParseError::new(
                 WorldDimensionParseErrorCodes::NotBigEnough,
-                format!(
+                &format!(
                     "World must have area (w*h) greater than {} to be playable. ({} is {})",
                     MIN_AREA, s, area
-                )
-                .to_string(),
+                ),
             ));
         }
         Ok(WorldDimensions {
