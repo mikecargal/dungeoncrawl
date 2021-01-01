@@ -12,6 +12,7 @@ pub fn hud(ecs: &SubWorld, #[resource] map: &Map) {
     draw_batch.print_centered(0, "Explore the Dungeon.  Cursor keys to move.");
     let health_x = (map.height - 1) * 2;
     let health_color = match player_health.current {
+        10 => WHITE,
         h if h > 7 => GREEN,
         h if h > 3 => YELLOW,
         _ => RED,
