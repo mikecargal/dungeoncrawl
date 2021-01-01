@@ -5,6 +5,14 @@ pub struct RoomsArchitect {
     height: i32,
 }
 
+impl RoomsArchitect {
+    pub fn boxed(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        #[cfg(debug_assertions)]
+        println!("Rooms Architect");
+        Box::new(Self { width, height })
+    }
+}
+
 impl MapArchitect for RoomsArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         let mut mb = MapBuilder {
@@ -27,11 +35,5 @@ impl MapArchitect for RoomsArchitect {
             mb.monster_spawns.push(room.center());
         }
         mb
-    }
-}
-
-impl RoomsArchitect {
-    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
-        Box::new(Self { width, height })
     }
 }

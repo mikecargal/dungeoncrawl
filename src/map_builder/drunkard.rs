@@ -7,7 +7,9 @@ pub struct DrunkardsWalkArchitect {
 }
 
 impl DrunkardsWalkArchitect {
-    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
+    pub fn boxed(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        #[cfg(debug_assertions)]
+        println!("DrunkardsWalk Architect");
         Box::new(Self { width, height })
     }
 

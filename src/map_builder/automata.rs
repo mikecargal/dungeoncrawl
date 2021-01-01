@@ -46,7 +46,9 @@ const NEIGHBOR_DELTAS: [(i32, i32); 8] = [
 ];
 
 impl CellularAutomataArchitect {
-    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
+    pub fn boxed(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        #[cfg(debug_assertions)]
+        println!("Cellular Automata Architect");
         Box::new(Self { width, height })
     }
 
