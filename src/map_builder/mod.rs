@@ -42,10 +42,9 @@ pub struct MapBuilder {
 const ROOMS_CREATOR_IDX: usize = 0;
 const DRUNKARDS_WALK_CREATOR_IDX: usize = ROOMS_CREATOR_IDX + 1;
 const CELLULAR_AUTOMATA_CREATOR_IDX: usize = DRUNKARDS_WALK_CREATOR_IDX + 1;
-const ARCHITECTS_COUNT: usize = CELLULAR_AUTOMATA_CREATOR_IDX + 1;
 
 type ArchitectCreator = fn(width: i32, height: i32) -> Box<dyn MapArchitect>;
-const ARCHICTECT_CREATORS: [ArchitectCreator; ARCHITECTS_COUNT] = [
+const ARCHICTECT_CREATORS: &[ArchitectCreator] = &[
     |w, h| {
         #[cfg(debug_assertions)]
         println!("Rooms Architect");
@@ -65,11 +64,9 @@ const ARCHICTECT_CREATORS: [ArchitectCreator; ARCHITECTS_COUNT] = [
 
 const DUNGEON_THEME_CREATOR_IDX: usize = 0;
 const FOREST_THEME_CREATOR_IDX: usize = DUNGEON_THEME_CREATOR_IDX + 1;
-const THEME_CREATOR_COUNT: usize = FOREST_THEME_CREATOR_IDX + 1;
 
 type ThemeCreator = fn() -> Box<dyn MapTheme>;
-const THEME_CREATORS: [ThemeCreator; THEME_CREATOR_COUNT] =
-    [|| DungeonTheme::new(), || ForestTheme::new()];
+const THEME_CREATORS: &[ThemeCreator] = &[|| DungeonTheme::new(), || ForestTheme::new()];
 
 fn get_random_architect(
     creators: &[ArchitectCreator],
@@ -96,7 +93,7 @@ impl MapBuilder {
         } = config.world_dimensions;
         let mut mb = match config.architect {
             ArchitectChoice::Random => {
-                get_random_architect(&ARCHICTECT_CREATORS, width, height, rng).build(rng)
+                get_random_architect(ARCHICTECT_CREATORS, width, height, rng).build(rng)
             }
             ArchitectChoice::Rooms => {
                 ARCHICTECT_CREATORS[ROOMS_CREATOR_IDX](width, height).build(rng)
@@ -112,7 +109,7 @@ impl MapBuilder {
         mb.theme = Some(match config.theme {
             ThemeChoice::Dungeon => THEME_CREATORS[DUNGEON_THEME_CREATOR_IDX](),
             ThemeChoice::Forest => THEME_CREATORS[FOREST_THEME_CREATOR_IDX](),
-            ThemeChoice::Random => get_random_theme(&THEME_CREATORS, rng),
+            ThemeChoice::Random => get_random_theme(THEME_CREATORS, rng),
         });
         #[cfg(debug_assertions)]
         {
