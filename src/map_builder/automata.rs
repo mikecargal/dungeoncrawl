@@ -33,6 +33,18 @@ impl MapArchitect for CellularAutomataArchitect {
     }
 }
 
+const NEIGHBOR_DELTAS: [(i32, i32); 8] = [
+    (-1, -1),
+    (-1, 0),
+    (-1, 1),
+    (0, -1),
+    //  (0,0) is self, not neighbor
+    (0, 1),
+    (1, 1),
+    (1, 0),
+    (1, 1),
+];
+
 impl CellularAutomataArchitect {
     pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
         Box::new(Self { width, height })
@@ -62,12 +74,9 @@ impl CellularAutomataArchitect {
     }
 
     fn count_neighbors(&self, x: i32, y: i32, map: &Map) -> usize {
-        (-1..=1)
-            .cartesian_product(-1..=1)
-            .filter(|(ix, iy)| {
-                !(*ix == 0 && *iy == 0)
-                    && map.tiles[map.index_for(x + *ix, y + *iy)] == TileType::Wall
-            })
+        NEIGHBOR_DELTAS
+            .iter()
+            .filter(|(ix, iy)| map.tiles[map.index_for(x + *ix, y + *iy)] == TileType::Wall)
             .count()
     }
 
