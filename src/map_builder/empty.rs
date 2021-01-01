@@ -6,6 +6,13 @@ pub struct EmptyArchitect {
     height: i32,
 }
 
+#[allow(dead_code)]
+impl EmptyArchitect {
+    pub fn boxed(width: i32, height: i32) -> Box<dyn MapArchitect> {
+        Box::new(Self { width, height })
+    }
+}
+
 impl MapArchitect for EmptyArchitect {
     fn build(&mut self, rng: &mut RandomNumberGenerator) -> MapBuilder {
         let mut mb = MapBuilder {
@@ -28,12 +35,5 @@ impl MapArchitect for EmptyArchitect {
             ))
         }
         mb
-    }
-}
-
-#[allow(dead_code)]
-impl EmptyArchitect {
-    pub fn new(width: i32, height: i32) -> Box<dyn MapArchitect> {
-        Box::new(Self { width, height })
     }
 }
