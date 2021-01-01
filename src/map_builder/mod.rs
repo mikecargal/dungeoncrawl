@@ -76,12 +76,12 @@ impl MapBuilder {
             ..
         } = config.world_dimensions;
         let mut mb = match config.architect {
-            ArchitectChoice::Random => {
-                get_random_architect(ARCHICTECT_CREATORS, width, height, rng)
-            }
             ArchitectChoice::Rooms => ROOMS_CREATOR(width, height),
             ArchitectChoice::CellularAutomata => CELLULAR_AUTOMATA_CREATOR(width, height),
             ArchitectChoice::Drunkard => DRUNKARDS_WALK_CREATOR(width, height),
+            ArchitectChoice::Random => {
+                get_random_architect(ARCHICTECT_CREATORS, width, height, rng)
+            }
         }
         .build(rng);
         apply_prefab(&mut mb, rng);
