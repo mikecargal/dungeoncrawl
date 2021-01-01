@@ -37,38 +37,42 @@ pub struct MapBuilder {
     pub theme: Option<Box<dyn MapTheme>>,
 }
 
+//type Creator<T> = fn() -> T;
+
 const ROOMS_CREATOR_IDX: usize = 0;
 const DRUNKARDS_WALK_CREATOR_IDX: usize = ROOMS_CREATOR_IDX + 1;
 const CELLULAR_AUTOMATA_CREATOR_IDX: usize = DRUNKARDS_WALK_CREATOR_IDX + 1;
-lazy_static! {
-    static ref ARCHICTECT_CREATORS: Vec<fn(width: i32, height: i32) -> Box<dyn MapArchitect>> = vec![
-        |w, h| {
-            #[cfg(debug_assertions)]
-            println!("Rooms Architect");
-            RoomsArchitect::new(w, h)
-        },
-        |w, h| {
-            #[cfg(debug_assertions)]
-            println!("DrunkardsWalk Architect");
-            DrunkardsWalkArchitect::new(w, h)
-        },
-        |w, h| {
-            #[cfg(debug_assertions)]
-            println!("Cellular Automata Architect");
-            CellularAutomataArchitect::new(w, h)
-        },
-    ];
-}
+const ARCHITECTS_COUNT: usize = CELLULAR_AUTOMATA_CREATOR_IDX + 1;
+
+type ArchitectCreator = fn(width: i32, height: i32) -> Box<dyn MapArchitect>;
+const ARCHICTECT_CREATORS: [ArchitectCreator; ARCHITECTS_COUNT] = [
+    |w, h| {
+        #[cfg(debug_assertions)]
+        println!("Rooms Architect");
+        RoomsArchitect::new(w, h)
+    },
+    |w, h| {
+        #[cfg(debug_assertions)]
+        println!("DrunkardsWalk Architect");
+        DrunkardsWalkArchitect::new(w, h)
+    },
+    |w, h| {
+        #[cfg(debug_assertions)]
+        println!("Cellular Automata Architect");
+        CellularAutomataArchitect::new(w, h)
+    },
+];
 
 const DUNGEON_THEME_CREATOR_IDX: usize = 0;
 const FOREST_THEME_CREATOR_IDX: usize = DUNGEON_THEME_CREATOR_IDX + 1;
-lazy_static! {
-    static ref THEME_CREATORS: Vec<fn() -> Box<dyn MapTheme>> =
-        vec![|| DungeonTheme::new(), || ForestTheme::new(),];
-}
+const THEME_CREATOR_COUNT: usize = FOREST_THEME_CREATOR_IDX + 1;
+
+type ThemeCreator = fn() -> Box<dyn MapTheme>;
+const THEME_CREATORS: [ThemeCreator; THEME_CREATOR_COUNT] =
+    [|| DungeonTheme::new(), || ForestTheme::new()];
 
 fn get_random_architect(
-    creators: &Vec<fn(width: i32, height: i32) -> Box<dyn MapArchitect>>,
+    creators: &[ArchitectCreator],
     width: i32,
     height: i32,
     rng: &mut RandomNumberGenerator,
@@ -76,7 +80,10 @@ fn get_random_architect(
     creators[rng.range(0, creators.len())](width, height)
 }
 
-fn get_random_from<T>(creators: &Vec<fn() -> T>, rng: &mut RandomNumberGenerator) -> T {
+fn get_random_theme(
+    creators: &[ThemeCreator],
+    rng: &mut RandomNumberGenerator,
+) -> Box<dyn MapTheme> {
     creators[rng.range(0, creators.len())]()
 }
 
@@ -105,7 +112,7 @@ impl MapBuilder {
         mb.theme = Some(match config.theme {
             ThemeChoice::Dungeon => THEME_CREATORS[DUNGEON_THEME_CREATOR_IDX](),
             ThemeChoice::Forest => THEME_CREATORS[FOREST_THEME_CREATOR_IDX](),
-            ThemeChoice::Random => get_random_from(&THEME_CREATORS, rng),
+            ThemeChoice::Random => get_random_theme(&THEME_CREATORS, rng),
         });
         #[cfg(debug_assertions)]
         {
