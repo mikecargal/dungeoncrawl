@@ -52,22 +52,6 @@ const DUNGEON_THEME_CREATOR: ThemeCreator = DungeonTheme::boxed;
 const FOREST_THEME_CREATOR: ThemeCreator = ForestTheme::boxed;
 const THEME_CREATORS: &[ThemeCreator] = &[DUNGEON_THEME_CREATOR, FOREST_THEME_CREATOR];
 
-fn get_random_architect(
-    creators: &[ArchitectCreator],
-    width: i32,
-    height: i32,
-    rng: &mut RandomNumberGenerator,
-) -> Box<dyn MapArchitect> {
-    creators[rng.range(0, creators.len())](width, height)
-}
-
-fn get_random_theme(
-    creators: &[ThemeCreator],
-    rng: &mut RandomNumberGenerator,
-) -> Box<dyn MapTheme> {
-    creators[rng.range(0, creators.len())]()
-}
-
 impl MapBuilder {
     pub fn build(config: &Config, rng: &mut RandomNumberGenerator) -> Self {
         let WorldDimensions {
@@ -80,7 +64,7 @@ impl MapBuilder {
             ArchitectChoice::CellularAutomata => CELLULAR_AUTOMATA_CREATOR(width, height),
             ArchitectChoice::Drunkard => DRUNKARDS_WALK_CREATOR(width, height),
             ArchitectChoice::Random => {
-                get_random_architect(ARCHICTECT_CREATORS, width, height, rng)
+                rng.random_slice_entry(ARCHICTECT_CREATORS).unwrap()(width, height)
             }
         }
         .build(rng);
@@ -88,7 +72,7 @@ impl MapBuilder {
         mb.theme = Some(match config.theme {
             ThemeChoice::Dungeon => DUNGEON_THEME_CREATOR(),
             ThemeChoice::Forest => FOREST_THEME_CREATOR(),
-            ThemeChoice::Random => get_random_theme(THEME_CREATORS, rng),
+            ThemeChoice::Random => rng.random_slice_entry(THEME_CREATORS).unwrap()(),
         });
         #[cfg(debug_assertions)]
         {
