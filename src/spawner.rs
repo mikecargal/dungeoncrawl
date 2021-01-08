@@ -9,7 +9,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: player_glyph(),
+            glyph: *PLAYER_GLYPH,
         },
         Health {
             current: PLAYER_MAX_HEALTH,
@@ -41,12 +41,46 @@ pub fn spawn_monster(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Poin
     ));
 }
 
+pub fn spawn_entity(ecs: &mut World, rng: &mut RandomNumberGenerator, pos: Point) {
+    match rng.roll_dice(1, 6) {
+        1 => spawn_healing_potion(ecs, pos),
+        2 => spawn_magic_mapper(ecs, pos),
+        _ => spawn_monster(ecs, rng, pos),
+    }
+}
+
+pub fn spawn_healing_potion(ecs: &mut World, pos: Point) {
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: *POTION_GLYPH,
+        },
+        Name("Healing Potion"),
+        ProvidesHealing { amount: 6 },
+    ));
+}
+
+pub fn spawn_magic_mapper(ecs: &mut World, pos: Point) {
+    ecs.push((
+        Item,
+        pos,
+        Render {
+            color: ColorPair::new(WHITE, BLACK),
+            glyph: *MAGIC_MAPPER_GLYPH,
+        },
+        Name("Dungeon Map"),
+        ProvidesDungeonMap {},
+    ));
+}
+
 fn goblin() -> (i32, &'static str, FontCharType) {
-    (1, "Goblin", goblin_glyph())
+    (1, "Goblin", *GOBLIN_GLYPH)
 }
 
 fn orc() -> (i32, &'static str, FontCharType) {
-    (2, "Orc", orc_glyph())
+    (2, "Orc", *ORC_GLYPH)
 }
 
 pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
@@ -56,7 +90,7 @@ pub fn spawn_amulet_of_yala(ecs: &mut World, pos: Point) {
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),
-            glyph: amulet_glyph(),
+            glyph: *AMULET_GLYPH,
         },
         Name("Amulet of Yala"),
     ));
