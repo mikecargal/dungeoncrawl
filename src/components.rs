@@ -65,6 +65,12 @@ pub struct Carried {
     pub by: Entity,
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub struct ActivateItem {
+    pub used_by: Entity,
+    pub item: Entity,
+}
+
 impl FieldOfView {
     pub fn new(radius: i32) -> Self {
         Self {
