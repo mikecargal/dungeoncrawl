@@ -26,7 +26,7 @@ pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camer
             if let Ok(health) = ecs.entry_ref(*entity).unwrap().get_component::<Health>() {
                 draw_batch.print(screen_pos, format!("{} : {} hp", &name.0, health.current));
             } else {
-                draw_batch.print(screen_pos, name.0);
+                draw_batch.print(screen_pos, &name.0);
             };
             draw_batch
                 .submit(ENTITY_LAYER.z_order + 100)
