@@ -50,13 +50,6 @@ impl Map {
             point.y < self.height-1
     }
 
-    pub fn in_bounds(&self, point: Point) -> bool {
-        point.x >= 0 && //.
-            point.x < self.width && //.
-            point.y >= 0 && //.
-            point.y < self.height
-    }
-
     pub fn can_enter_tile(&self, point: Point) -> bool {
         self.in_bounds(point) && self.tiles[self.index_for(point.x, point.y)] == TileType::Floor
     }
@@ -142,5 +135,12 @@ impl BaseMap for Map {
 impl Algorithm2D for Map {
     fn dimensions(&self) -> Point {
         Point::new(self.width, self.height)
+    }
+
+    fn in_bounds(&self, point: Point) -> bool {
+        point.x >= 0 && //.
+            point.x < self.width && //.
+            point.y >= 0 && //.
+            point.y < self.height
     }
 }

@@ -12,6 +12,8 @@ lazy_static! {
 #[read_component(Player)]
 #[read_component(Enemy)]
 #[write_component(Health)]
+#[read_component(Item)]
+#[read_component(Carried)]
 pub fn player_input(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
@@ -29,6 +31,21 @@ pub fn player_input(
             VirtualKeyCode::Right => *MOVE_RIGHT,
             VirtualKeyCode::Up => *MOVE_UP,
             VirtualKeyCode::Down => *MOVE_DOWN,
+            VirtualKeyCode::G => {
+                let (player, player_pos) = players
+                    .iter(ecs)
+                    .find_map(|(entity, pos)| Some((*entity, *pos)))
+                    .unwrap();
+                let mut items = <(Entity, &Item, &Point)>::query();
+                items
+                    .iter(ecs)
+                    .filter(|(_entity, _item, &item_pos)| item_pos == player_pos)
+                    .for_each(|(entity, _item, &_item_pos)| {
+                        commands.remove_component::<Point>(*entity);
+                        commands.add_component(*entity, Carried { by: player });
+                    });
+                Point::zero()
+            }
             _ => *DONT_MOVE,
         };
         let (player_entity, destination) = players

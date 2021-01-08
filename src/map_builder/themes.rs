@@ -11,8 +11,8 @@ impl DungeonTheme {
 impl MapTheme for DungeonTheme {
     fn tile_to_render(&self, tile_type: TileType) -> FontCharType {
         match tile_type {
-            TileType::Floor => dungeon_floor_glyph(),
-            TileType::Wall => dungeon_wall_glyph(),
+            TileType::Floor => *DUNGEON_FLOOR_GLYPH,
+            TileType::Wall => *DUNGEON_WALL_GLYPH,
         }
     }
 }
@@ -28,8 +28,8 @@ impl ForestTheme {
 impl MapTheme for ForestTheme {
     fn tile_to_render(&self, tile_type: TileType) -> u16 {
         match tile_type {
-            TileType::Floor => forest_floor_glyph(),
-            TileType::Wall => forest_wall_glyph(),
+            TileType::Floor => *FOREST_FLOOR_GLYPH,
+            TileType::Wall => *FOREST_WALL_GLYPH,
         }
     }
 }
@@ -42,35 +42,18 @@ const GOBLIN_CHAR: char = 'g';
 const ORC_CHAR: char = 'O';
 const PLAYER_CHAR: char = '@';
 const AMULET_CHAR: char = '|';
+const POTION_CHAR: char = '!';
+const MAGIC_MAPPER_CHAR: char = '{';
 
-pub fn dungeon_floor_glyph() -> FontCharType {
-    to_cp437(DUNGEON_FLOOR_CHAR)
-}
-
-pub fn dungeon_wall_glyph() -> FontCharType {
-    to_cp437(DUNGEON_WALL_CHAR)
-}
-
-pub fn forest_floor_glyph() -> FontCharType {
-    to_cp437(FOREST_FLOOR_CHAR)
-}
-
-pub fn forest_wall_glyph() -> FontCharType {
-    to_cp437(FOREST_TREE_CHAR)
-}
-
-pub fn goblin_glyph() -> FontCharType {
-    to_cp437(GOBLIN_CHAR)
-}
-
-pub fn orc_glyph() -> FontCharType {
-    to_cp437(ORC_CHAR)
-}
-
-pub fn player_glyph() -> FontCharType {
-    to_cp437(PLAYER_CHAR)
-}
-
-pub fn amulet_glyph() -> FontCharType {
-    to_cp437(AMULET_CHAR)
+lazy_static! {
+    pub static ref DUNGEON_FLOOR_GLYPH: FontCharType = to_cp437(DUNGEON_FLOOR_CHAR);
+    pub static ref DUNGEON_WALL_GLYPH: FontCharType = to_cp437(DUNGEON_WALL_CHAR);
+    pub static ref FOREST_FLOOR_GLYPH: FontCharType = to_cp437(FOREST_FLOOR_CHAR);
+    pub static ref FOREST_WALL_GLYPH: FontCharType = to_cp437(FOREST_TREE_CHAR);
+    pub static ref GOBLIN_GLYPH: FontCharType = to_cp437(GOBLIN_CHAR);
+    pub static ref ORC_GLYPH: FontCharType = to_cp437(ORC_CHAR);
+    pub static ref PLAYER_GLYPH: FontCharType = to_cp437(PLAYER_CHAR);
+    pub static ref AMULET_GLYPH: FontCharType = to_cp437(AMULET_CHAR);
+    pub static ref POTION_GLYPH: FontCharType = to_cp437(POTION_CHAR);
+    pub static ref MAGIC_MAPPER_GLYPH: FontCharType = to_cp437(MAGIC_MAPPER_CHAR);
 }

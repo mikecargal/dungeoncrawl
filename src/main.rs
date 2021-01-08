@@ -117,7 +117,7 @@ impl State {
         map_builder
             .monster_spawns
             .iter()
-            .for_each(|pos| spawn_monster(&mut ecs, &mut rng, *pos));
+            .for_each(|pos| spawn_entity(&mut ecs, &mut rng, *pos));
         resources.insert(map_builder.map);
         let WorldDimensions {
             display_width,
