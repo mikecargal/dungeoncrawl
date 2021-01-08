@@ -13,6 +13,7 @@ impl MapTheme for DungeonTheme {
         match tile_type {
             TileType::Floor => *DUNGEON_FLOOR_GLYPH,
             TileType::Wall => *DUNGEON_WALL_GLYPH,
+            TileType::Exit => *STAIRS_GLYPH,
         }
     }
 }
@@ -30,6 +31,7 @@ impl MapTheme for ForestTheme {
         match tile_type {
             TileType::Floor => *FOREST_FLOOR_GLYPH,
             TileType::Wall => *FOREST_WALL_GLYPH,
+            TileType::Exit => *STAIRS_GLYPH,
         }
     }
 }
@@ -38,6 +40,7 @@ const DUNGEON_FLOOR_CHAR: char = '.';
 const DUNGEON_WALL_CHAR: char = '#';
 const FOREST_FLOOR_CHAR: char = ';';
 const FOREST_TREE_CHAR: char = '"';
+const STAIRS_CHAR: char = '>';
 const GOBLIN_CHAR: char = 'g';
 const ORC_CHAR: char = 'O';
 const PLAYER_CHAR: char = '@';
@@ -50,6 +53,7 @@ lazy_static! {
     pub static ref DUNGEON_WALL_GLYPH: FontCharType = to_cp437(DUNGEON_WALL_CHAR);
     pub static ref FOREST_FLOOR_GLYPH: FontCharType = to_cp437(FOREST_FLOOR_CHAR);
     pub static ref FOREST_WALL_GLYPH: FontCharType = to_cp437(FOREST_TREE_CHAR);
+    pub static ref STAIRS_GLYPH: FontCharType = to_cp437(STAIRS_CHAR);
     pub static ref GOBLIN_GLYPH: FontCharType = to_cp437(GOBLIN_CHAR);
     pub static ref ORC_GLYPH: FontCharType = to_cp437(ORC_CHAR);
     pub static ref PLAYER_GLYPH: FontCharType = to_cp437(PLAYER_CHAR);

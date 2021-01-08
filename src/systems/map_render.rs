@@ -31,6 +31,7 @@ pub fn map_render(
                 match map.tiles[idx] {
                     TileType::Floor => *DUNGEON_FLOOR_GLYPH,
                     TileType::Wall => *DUNGEON_WALL_GLYPH,
+                    TileType::Exit => *STAIRS_GLYPH,
                 }
             };
             draw_batch.set(pt - offset, ColorPair::new(tint, BLACK), glyph);

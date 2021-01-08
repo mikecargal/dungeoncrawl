@@ -5,7 +5,7 @@ const PLAYER_SIGHT_DISTANCE: i32 = 8;
 const MONSTER_SIGHT_DISTANCE: i32 = 6;
 pub fn spawn_player(ecs: &mut World, pos: Point) {
     ecs.push((
-        Player,
+        Player { map_level: 0 },
         pos,
         Render {
             color: ColorPair::new(WHITE, BLACK),

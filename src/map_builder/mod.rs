@@ -363,6 +363,7 @@ pub fn display(
     const MONSTER: char = 'M';
     const START: char = 'S';
     const END: char = 'E';
+    const STAIRS: char = '>';
 
     use colored::*;
     let mut output = vec!['.'; (map.width * map.height) as usize];
@@ -370,6 +371,7 @@ pub fn display(
     map.tiles.iter().enumerate().for_each(|(idx, t)| match *t {
         TileType::Floor => output[idx] = FLOOR,
         TileType::Wall => output[idx] = WALL,
+        TileType::Exit => output[idx] = STAIRS,
     });
 
     if let Some(pos) = player_start {

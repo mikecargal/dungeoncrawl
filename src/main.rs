@@ -105,15 +105,16 @@ impl State {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
-        let map_builder = MapBuilder::build(&config, &mut rng);
+        let mut map_builder = MapBuilder::build(&config, &mut rng);
         spawn_player(
             &mut ecs,
             map_builder.player_start.expect("What?? No player?"),
         );
-        spawn_amulet_of_yala(
-            &mut ecs,
-            map_builder.amulet_start.expect("There was no Amulet!!"),
-        );
+
+        let exit_idx = map_builder
+            .map
+            .point2d_to_index(map_builder.amulet_start.expect("There was no Amulet!!"));
+        map_builder.map.tiles[exit_idx] = TileType::Exit;
         map_builder
             .monster_spawns
             .iter()
@@ -190,6 +191,72 @@ impl State {
         self.ecs = ecs;
         self.resources = resources;
     }
+
+    fn advance_level(&mut self) {
+        let player_entity = *<Entity>::query()
+            .filter(component::<Player>())
+            .iter(&mut self.ecs)
+            .nth(0)
+            .unwrap();
+
+        use std::collections::HashSet;
+        let mut entities_to_keep = HashSet::new();
+        entities_to_keep.insert(player_entity);
+        <(Entity, &Carried)>::query()
+            .iter(&self.ecs)
+            .filter(|(_entity, carry)| carry.by == player_entity)
+            .map(|(entity, _carry)| *entity)
+            .for_each(|entity| {
+                entities_to_keep.insert(entity);
+            });
+
+        let mut cb = CommandBuffer::new(&mut self.ecs);
+        for entity in Entity::query().iter(&self.ecs) {
+            if !entities_to_keep.contains(entity) {
+                cb.remove(*entity);
+            }
+        }
+        cb.flush(&mut self.ecs);
+        <&mut FieldOfView>::query()
+            .iter_mut(&mut self.ecs)
+            .for_each(|fov| fov.visible_tiles = None);
+
+        let mut rng = RandomNumberGenerator::new();
+        let mut map_builder = MapBuilder::build(&self.config, &mut rng);
+
+        let mut map_level = 0;
+        <(&mut Player, &mut Point)>::query()
+            .iter_mut(&mut self.ecs)
+            .for_each(|(player, pos)| {
+                player.map_level += 1;
+                map_level = player.map_level;
+                let ps = map_builder.player_start.unwrap();
+                pos.x = ps.x;
+                pos.y = ps.y;
+            });
+
+        if map_level == 2 {
+            spawn_amulet_of_yala(&mut self.ecs, map_builder.amulet_start.unwrap());
+        } else {
+            let exit_idx = map_builder
+                .map
+                .point2d_to_index(map_builder.amulet_start.unwrap());
+            map_builder.map.tiles[exit_idx] = TileType::Exit;
+        }
+
+        map_builder
+            .monster_spawns
+            .iter()
+            .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, *pos));
+        self.resources.insert(map_builder.map);
+        self.resources.insert(Camera::new(
+            map_builder.player_start.unwrap(),
+            self.config.world_dimensions.display_width,
+            self.config.world_dimensions.display_height,
+        ));
+        self.resources.insert(TurnState::AwaitingInput);
+        self.resources.insert(map_builder.theme);
+    }
 }
 
 impl GameState for State {
@@ -214,6 +281,7 @@ impl GameState for State {
                 .execute(&mut self.ecs, &mut self.resources),
             TurnState::GameOver => self.game_over(ctx),
             TurnState::Victory => self.victory(ctx),
+            TurnState::NextLevel => self.advance_level(),
         }
         render_draw_buffer(ctx).expect("Render Error");
     }
