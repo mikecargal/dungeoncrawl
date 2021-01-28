@@ -26,11 +26,6 @@ pub mod prelude {
     pub use legion::systems::CommandBuffer;
     pub use legion::world::SubWorld;
 
-    //   pub const SCREEN_WIDTH: i32 = 120;
-    //   pub const SCREEN_HEIGHT: i32 = 80;
-    // pub const NUM_TILES: usize = (SCREEN_WIDTH * SCREEN_HEIGHT) as usize;
-    //   pub const DISPLAY_WIDTH: i32 = SCREEN_WIDTH / 2;
-    //   pub const DISPLAY_HEIGHT: i32 = SCREEN_HEIGHT / 2;
     pub const GAME_TILE_WIDTH: i32 = 32;
     pub const GAME_TILE_HEIGHT: i32 = 32;
     pub const HUD_TILE_WIDTH: i32 = 8;
@@ -296,6 +291,7 @@ fn main() -> BError {
     } = config.world_dimensions;
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
+        .with_platform_specific(30.0)
         .with_dimensions(display_width, display_height)
         .with_tile_dimensions(GAME_TILE_WIDTH, GAME_TILE_WIDTH)
         .with_resource_path("resources/")
