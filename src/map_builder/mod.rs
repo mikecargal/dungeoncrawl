@@ -254,15 +254,15 @@ impl MapBuilder {
             #[cfg(debug_assertions)]
             {
                 println!("tunnel from {:?} to {:?}", start, end);
-                display(
-                    "Map ",
-                    &self.map,
-                    &None,
-                    &None,
-                    &[],
-                    &Some(start),
-                    &Some(end),
-                );
+                // display(
+                //     "Map ",
+                //     &self.map,
+                //     &None,
+                //     &None,
+                //     &[],
+                //     &Some(start),
+                //     &Some(end),
+                // );
             }
         }
     }
