@@ -291,7 +291,7 @@ fn main() -> BError {
     } = config.world_dimensions;
     let context = BTermBuilder::new()
         .with_title("Dungeon Crawler")
-        .with_platform_specific(30.0)
+        .with_fps_cap(30.0)
         .with_dimensions(display_width, display_height)
         .with_tile_dimensions(GAME_TILE_WIDTH, GAME_TILE_WIDTH)
         .with_resource_path("resources/")
