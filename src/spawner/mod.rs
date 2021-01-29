@@ -19,6 +19,7 @@ pub fn spawn_player(ecs: &mut World, pos: Point) {
             max: PLAYER_MAX_HEALTH,
         },
         FieldOfView::new(PLAYER_SIGHT_DISTANCE),
+        Damage(1),
     ));
 }
 
