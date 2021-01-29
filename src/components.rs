@@ -31,7 +31,7 @@ pub struct Health {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct Name<'a>(pub &'a str);
+pub struct Name(pub String);
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct WantsToAttack {

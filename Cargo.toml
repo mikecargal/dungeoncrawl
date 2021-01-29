@@ -7,6 +7,8 @@ description = "A simple little \"You need to save the world by finding the Amule
 [dependencies]
 bracket-lib = "0.8.1"
 legion = "=0.3.1"
+serde = { version = "=1.0.115"}
+ron = "=0.6.1"
 colored = "2"
 lazy_static = "1.4.0"
 itertools = "0.9.0"
