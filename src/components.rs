@@ -31,7 +31,7 @@ pub struct Health {
 }
 
 #[derive(Clone, PartialEq)]
-pub struct Name<'a>(pub &'a str);
+pub struct Name(pub String);
 
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub struct WantsToAttack {
@@ -66,6 +66,12 @@ pub struct ProvidesDungeonMap {}
 pub struct Carried {
     pub by: Entity,
 }
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Damage(pub i32);
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct Weapon;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct ActivateItem {

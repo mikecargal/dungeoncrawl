@@ -84,8 +84,8 @@ struct NewGameData {
 }
 
 impl State {
-    fn new(config: Config) -> Self {
-        let NewGameData { ecs, resources } = State::new_game_data(&config);
+    fn new(config: Config, level: usize) -> Self {
+        let NewGameData { ecs, resources } = State::new_game_data(&config, level);
         Self {
             ecs,
             resources,
@@ -96,7 +96,7 @@ impl State {
         }
     }
 
-    fn new_game_data(config: &Config) -> NewGameData {
+    fn new_game_data(config: &Config, level: usize) -> NewGameData {
         let mut ecs = World::default();
         let mut resources = Resources::default();
         let mut rng = RandomNumberGenerator::new();
@@ -110,10 +110,7 @@ impl State {
             .map
             .point2d_to_index(map_builder.amulet_start.expect("There was no Amulet!!"));
         map_builder.map.tiles[exit_idx] = TileType::Exit;
-        map_builder
-            .monster_spawns
-            .iter()
-            .for_each(|pos| spawn_entity(&mut ecs, &mut rng, *pos));
+        spawn_level(&mut ecs, &mut rng, level, &map_builder.monster_spawns);
         resources.insert(map_builder.map);
         let WorldDimensions {
             display_width,
@@ -155,13 +152,13 @@ impl State {
         ctx.print_color_centered(9, GREEN, BLACK, "Press 1 to play again.");
 
         if let Some(VirtualKeyCode::Key1) = ctx.key {
-            self.reset_game_state();
+            self.reset_game_state(0);
         }
     }
 
     fn victory(&mut self, ctx: &mut BTerm) {
         ctx.set_active_console(HUD_LAYER.id);
-        ctx.print_color_centered(2, GREEN, BLACK, "Your have won!");
+        ctx.print_color_centered(2, GREEN, BLACK, "You have won!");
         ctx.print_color_centered(
             4,
             WHITE,
@@ -177,12 +174,12 @@ impl State {
         ctx.print_color_centered(7, GREEN, BLACK, "Press 1 to play again.");
 
         if let Some(VirtualKeyCode::Key1) = ctx.key {
-            self.reset_game_state();
+            self.reset_game_state(0);
         }
     }
 
-    fn reset_game_state(&mut self) {
-        let NewGameData { ecs, resources } = Self::new_game_data(&self.config);
+    fn reset_game_state(&mut self, level: usize) {
+        let NewGameData { ecs, resources } = Self::new_game_data(&self.config, level);
         self.ecs = ecs;
         self.resources = resources;
     }
@@ -239,10 +236,12 @@ impl State {
             map_builder.map.tiles[exit_idx] = TileType::Exit;
         }
 
-        map_builder
-            .monster_spawns
-            .iter()
-            .for_each(|pos| spawn_entity(&mut self.ecs, &mut rng, *pos));
+        spawn_level(
+            &mut self.ecs,
+            &mut rng,
+            map_level as usize,
+            &map_builder.monster_spawns,
+        );
         self.resources.insert(map_builder.map);
         self.resources.insert(Camera::new(
             map_builder.player_start.unwrap(),
@@ -306,5 +305,5 @@ fn main() -> BError {
         )
         .build()?;
 
-    main_loop(context, State::new(config))
+    main_loop(context, State::new(config, 0))
 }
